@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+    children,
+  }: Readonly<{
+    children: React.ReactNode;
+  }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-gray-main">
       <body className={inter.className}>{children}</body>
     </html>
   );

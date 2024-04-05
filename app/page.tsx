@@ -1,113 +1,502 @@
+"use client"
+
 import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "./globals.css";
+import "swiper/css";
+import "swiper/css/free-mode";
+import "swiper/css/thumbs";
+import "swiper/css/scrollbar";
+import "swiper/css/effect-fade"
+import "swiper/css/zoom";
+import "swiper/css/grid";
+import { useEffect, useRef, useState } from "react";
+import { FreeMode, Thumbs, Mousewheel, Scrollbar, Zoom, Grid, Keyboard, EffectFade } from "swiper/modules";
+import { slideDataImages } from "./data";
+import { FaBars } from "react-icons/fa";
+import { Transition, TransitionStatus } from "react-transition-group";
+import clsx from "clsx";
+import { Swiper as SwiperType } from "swiper/types";
+import ButtonIcon from "@/components/button/ButtonIcon";
+import HeaderDivider from "@/components/header/HeaderDivider";
+import { FaMinus, FaPlus } from "react-icons/fa6";
+import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
+import { sortAsc } from "@/utils/sortArrayAsc";
+import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
+import { MdRotate90DegreesCcw } from "react-icons/md";
+import { TbArrowAutofitWidth } from "react-icons/tb";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { useIsClient, useOnClickOutside, useWindowSize, useScrollLock } from "usehooks-ts"
+import ButtonOption from "@/components/button/ButtonOption";
+import { useIsMobile } from "@/hooks/useIsMobile";
+
+type TransitionStyles = {
+  [key in TransitionStatus]?: React.CSSProperties;
+};
+
+
+const smallSwiperTransitionDuration = 300;
+const moreOptionsTransitionDuration = 150;
+const zoomScaleArray = [0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5]
+
+const smallSwiperDefaultStyle = {
+  transition: `transform ${smallSwiperTransitionDuration}ms ease-out`,
+  transform: "translateX(0)"
+}
+const moreOptionsDefaultStyle = {
+  transition: `opacity ${moreOptionsTransitionDuration}ms ease-out`,
+  opacity: 0
+}
+
+const smallSwiperTransitionStyles: TransitionStyles = {
+  entering: { transform: "translateX(0)" },
+  entered: { transform: "translateX(0)" },
+  exiting: { transform: "translateX(-100%)" },
+  exited: { transform: "translateX(-100%)" },
+};
+const moreOptionsTransitionStyles: TransitionStyles = {
+  entering: { opacity: 1 },
+  entered: { opacity: 1 },
+  exiting: { opacity: 0 },
+  exited: { opacity: 0 },
+};
 
 export default function Home() {
+  const demoRef = useRef<HTMLDivElement>(null)
+  const isClient = useIsClient()
+  const swiperRef = useRef<SwiperType | null>(null)
+  const moreOptionRef = useRef<HTMLDivElement>(null)
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [showSmallSwiper, setShowSmallSwiper] = useState(true)
+  const [activeSlide, setActiveSlide] = useState(1)
+  const [zoomScale, setZoomScale] = useState(1)
+  const [fitWidth, setFitWidth] = useState(false)
+  const [slideRotate, setSlideRotate] = useState(0)
+  const [moreOptions, setMoreOptions] = useState(false)
+  const [options, setOptions] = useState({ twoPage: false, fullScreen: false })
+  const { width } = useWindowSize()
+  const isMobile = useIsMobile()
+  const [isLandscape, setIsLandscape] = useState(false)
+  const { lock, unlock } = useScrollLock({
+    autoLock: false,
+    lockTarget: document.body,
+  })
+
+  // close more options
+  const closeMoreOptions = () => {
+    setMoreOptions(false)
+  }
+
+  // close more options pop up
+  useOnClickOutside(moreOptionRef, closeMoreOptions)
+
+  // update zoom slide
+  // useEffect(() => {
+  //   if (swiperRef.current) {
+  //     swiperRef.current.zoom.in(zoomScale)
+  //   }
+  // }, [zoomScale])
+
+  // disable full screen
+  useEffect(() => {
+    if (options.fullScreen) {
+      const toggleFullscreen = () => {
+        setOptions((prevState) => {
+          return { ...prevState, fullScreen: false }
+        })
+      }
+      const screenChangeDisableFullscreen = () => {
+        if (!document.fullscreenElement) {
+          toggleFullscreen()
+        }
+      }
+      const screenErrorDisableFullscreen = () => {
+        toggleFullscreen()
+      }
+      const keyDownDisableFullscreen = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          if (!document.fullscreenElement) {
+            toggleFullscreen()
+          }
+        }
+      }
+      window.addEventListener("fullscreenchange", screenChangeDisableFullscreen);
+      window.addEventListener("fullscreenerror", screenErrorDisableFullscreen);
+      window.addEventListener("keydown", keyDownDisableFullscreen);
+      return () => {
+        window.removeEventListener("fullscreenchange", screenChangeDisableFullscreen);
+        window.removeEventListener("fullscreenerror", screenErrorDisableFullscreen);
+        window.removeEventListener("keydown", keyDownDisableFullscreen);
+      }
+    }
+  }, [options.fullScreen])
+
+  // show/hide slide scrollbar when out/in full screen mode
+  useEffect(() => {
+    const bigSwiperScrollbar = document.querySelector<HTMLElement>(".big-swiper")?.querySelector<HTMLElement>(".swiper-scrollbar")
+    if (bigSwiperScrollbar) {
+      if (options.fullScreen) {
+        bigSwiperScrollbar.style.visibility = "hidden"
+      } else {
+        bigSwiperScrollbar.style.visibility = "visible"
+      }
+    }
+  }, [options.fullScreen])
+
+  // reset slide to rotate 0 when zoom
+  useEffect(() => {
+    if (zoomScale) {
+      setSlideRotate(0)
+    }
+  }, [zoomScale])
+
+  // show/hide small swiper
+  const toggleSmallSwiper = () => setShowSmallSwiper(!showSmallSwiper)
+
+  // toggle fit width slide
+  const toggleFitWidth = () => setFitWidth(!fitWidth)
+
+  // change rotate slide
+  const handleRotateSlide = () => {
+    setZoomScale(1)
+    if (slideRotate === 270) {
+      setSlideRotate(0)
+    } else {
+      setSlideRotate(slideRotate + 90)
+    }
+  }
+
+  // toggle more options pop up
+  const handleMoreOptions = () => setMoreOptions(!moreOptions)
+
+  // handle toggle two page mode
+  const toggleTwoPageMode = () => setOptions((prevState) => {
+    closeMoreOptions()
+    return { ...prevState, twoPage: !prevState.twoPage }
+  })
+
+  // set activeSlide
+  const handleChangeInputActiveSlide = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setActiveSlide(Number(e.target.value))
+  }
+
+  // handle action di chuyen den slide
+  const handleChangeActiveSlide = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    // tim slide hop le
+    const s = Math.min(Math.max(1, activeSlide), slideDataImages.length)
+    // set activeSlide lai thanh gia tri hop le
+    setActiveSlide(s)
+    // di chuyen den slide do
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(s - 1);
+    }
+  }
+
+  // set zoom scale
+  const handleChangeInputZoomSlide = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setZoomScale(Number(e.target.value.replace("%", "")) / 100)
+  }
+
+  // handle action zoom slide
+  const handleChangeZoomSlide = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    // tim zoomScale hop le
+    const z = Math.min(Math.max(zoomScaleArray[0], zoomScale), 5)
+    // set zoomScale lai thanh gia tri hop le
+    setZoomScale(z)
+  }
+
+  // handle action plus zoomScale
+  const handlePlusZoomSlide = () => {
+    const z = findNearestBiggerNumber(zoomScale, sortAsc(zoomScaleArray))
+    setZoomScale(z as number)
+  }
+
+  // handle action minus zoomScale
+  const handleMinusZoomSlide = () => {
+    const z = findNearestSmallerNumber(zoomScale, sortAsc(zoomScaleArray))
+    setZoomScale(z as number)
+  }
+
+  // toggle full screen 
+  const toggleFullscreen = () => {
+    closeMoreOptions()
+    setOptions((prevState) => {
+      return { ...prevState, fullScreen: !prevState.fullScreen }
+    })
+    const elem = document.querySelector(".big-swiper")
+    if (elem) {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      }
+    }
+  }
+
+  useEffect(() => {
+    const preventDefaultScroll = (e: any) => {
+      e.preventDefault();
+    }
+    const allowDefaultScroll = (e: any) => {
+      return
+    }
+    if (isLandscape) {
+      demoRef.current?.scrollIntoView()
+      window.addEventListener('wheel', preventDefaultScroll, { passive: false });
+      window.addEventListener('mousewheel', preventDefaultScroll, { passive: false });
+      window.addEventListener('DOMMouseScroll', preventDefaultScroll, { passive: false });
+      window.addEventListener('touchmove', preventDefaultScroll, { passive: false });
+      // document.documentElement.style.overflowY = "hidden"
+      // document.body.style.overflowY = "hidden"
+      swiperRef.current?.update()
+    } else {
+      window.removeEventListener('wheel', preventDefaultScroll);
+      window.removeEventListener('mousewheel', preventDefaultScroll);
+      window.removeEventListener('DOMMouseScroll', preventDefaultScroll);
+      window.removeEventListener('touchmove', preventDefaultScroll);
+      swiperRef.current?.update()
+    }
+  }, [isLandscape, lock, unlock])
+
+  console.log(isMobile && !isLandscape)
+
+  useEffect(() => {
+    const disableOrientation = () => {
+      if (window.innerHeight > window.innerWidth) {
+        document.getElementsByTagName('body')[0].style.transform = "rotate(90deg)";
+      }
+    }
+    window.addEventListener('orientationchange', disableOrientation);
+    return () => window.removeEventListener('orientationchange', disableOrientation);
+  }, [])
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main ref={demoRef} className={clsx("relative bg-gray-main", {
+      "h-screen": !isLandscape,
+      "w-[100vh] h-[100vw]": isLandscape
+    })} style={isLandscape ? { transform: "rotate(90deg) translateX(100%)", transformOrigin: "top right" } : undefined}>
+
+      {/* header */}
+      <header className="hidden lg:flex relative h-[7.5dvh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center" style={{ boxShadow: "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px" }}>
+
+        <div className="flex flex-row items-center">
+          {/* toggle small swiper */}
+          <ButtonIcon onClick={toggleSmallSwiper}>
+            <FaBars className="text-neutral-100 text-1.15" />
+          </ButtonIcon>
+
+          {/* file name */}
+          <strong className="text-1.15 ml-3 font-medium capitalize">File Name</strong>
         </div>
+
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">
+          {/* form change active slide */}
+          <form className="flex flex-row items-center mr-4" onSubmit={(e) => handleChangeActiveSlide(e)}>
+            <input
+              type="number"
+              className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
+              value={activeSlide}
+              onChange={(e) => handleChangeInputActiveSlide(e)}
+            />
+            <p className="text-0.75 text-white ml-1.5">/</p>
+            <p className="text-0.75 text-white ml-1.5">{slideDataImages.length}</p>
+          </form>
+
+          {/* divider */}
+          <HeaderDivider />
+
+          {/* form change zoom scale */}
+          <form className="flex flex-row items-center mx-1.5" onSubmit={(e) => handleChangeZoomSlide(e)}>
+            <ButtonIcon type="button" onClick={handleMinusZoomSlide} disabled={options.twoPage}>
+              <FaMinus className="" />
+            </ButtonIcon>
+            <input
+              type="text"
+              className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
+              value={`${Math.floor(zoomScale * 100)}%`}
+              onChange={(e) => handleChangeInputZoomSlide(e)}
+              disabled={options.twoPage}
+            />
+            <ButtonIcon type="button" onClick={handlePlusZoomSlide} disabled={options.twoPage}>
+              <FaPlus className="" />
+            </ButtonIcon>
+          </form>
+
+          {/* divider */}
+          <HeaderDivider />
+
+          {/* full width and rotate */}
+          <div className="flex flex-row items-center ml-4">
+            <ButtonIcon onClick={toggleFitWidth}>
+              <TbArrowAutofitWidth className="" />
+            </ButtonIcon>
+            <ButtonIcon onClick={handleRotateSlide}>
+              <MdRotate90DegreesCcw className="" />
+            </ButtonIcon>
+          </div>
+        </div>
+
+        {/* download, print */}
+        <div className="ml-auto flex flex-row items-center">
+          {/* more options */}
+          <div ref={moreOptionRef} className="relative ml-1.5">
+            {/* more options button */}
+            <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
+              <BsThreeDotsVertical className="" />
+            </ButtonIcon>
+
+            {/* more options pop up */}
+            <Transition in={moreOptions} timeout={moreOptionsTransitionDuration}>
+              {state => (
+                <div className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
+                  style={{
+                    ...moreOptionsDefaultStyle,
+                    ...moreOptionsTransitionStyles[state],
+                    "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"
+                  }}>
+                  <ButtonOption
+                    isActive={options.twoPage}
+                    text="Chế độ xem hai trang"
+                    onClick={toggleTwoPageMode}
+                  />
+                  <div className="w-full my-1.5 h-px bg-neutral-700" />
+                  <ButtonOption text="Thuyết trình" isActive={options.fullScreen} onClick={toggleFullscreen}
+                  />
+                </div>
+              )}
+            </Transition>
+          </div>
+        </div>
+      </header>
+
+      {moreOptions && <div className="hidden lg:block fixed w-screen overflow-hidden h-dvh z-10 bg-transparent" />}
+
+      {/* 2 swiper */}
+      <div className="h-full lg:h-[92.5dvh] w-full lg:flex flex-row p-1.5 lg:px-0">
+
+        {/* small swiper */}
+        <div className="hidden lg:block h-full w-[19%]">
+          <Transition
+            in={showSmallSwiper}
+            timeout={smallSwiperTransitionDuration}
+            mountOnEnter
+          >
+            {state => (
+              <Swiper
+                style={{ ...smallSwiperDefaultStyle, ...smallSwiperTransitionStyles[state] }}
+                onSwiper={setThumbsSwiper as any}
+                slidesPerView="auto"
+                speed={400}
+                slidesPerGroup={5}
+                spaceBetween={width / 100 * 2}
+                mousewheel={{ sensitivity: 2 }}
+                direction="vertical"
+                freeMode
+                wrapperClass="swiper-wrapper initial-swiper"
+                scrollbar={{
+                  enabled: true,
+                  draggable: true
+                }}
+                modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
+                className={clsx("small-swiper", { "small-swiper-hide": !showSmallSwiper })}
+                onAfterInit={() => {
+                  document.querySelector(".swiper-wrapper")?.classList.remove("initial-swiper")
+                }}
+              >
+                {slideDataImages.map((item, i) => {
+                  return (
+                    <SwiperSlide key={item.id}>
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        width={1920}
+                        height={1080}
+                        priority={i < 5}
+                        className="aspect-video"
+                      />
+                      <p className="swiper-slide-text">{i + 1}</p>
+                    </SwiperSlide>
+                  )
+                })}
+              </Swiper>
+            )}
+          </Transition>
+        </div>
+
+        {/* big swiper */}
+        <Swiper
+          key={isLandscape ? 2 : 1}
+          speed={400}
+          direction={options.twoPage ? "horizontal" : "vertical"}
+          thumbs={isMobile ? undefined : { swiper: thumbsSwiper }}
+          mousewheel={{ enabled: false, invert: true }}
+          spaceBetween={isMobile ? width / 100 * 1.5 : 0}
+          slidesPerView={isMobile ? "auto" : (options.twoPage ? 2 : 1)}
+          slidesPerGroup={isMobile ? 1 : (options.twoPage ? 2 : 1)}
+          scrollbar={isMobile ? false : {
+            enabled: true,
+            draggable: true,
+          }}
+          effect={isLandscape ? "fade" : "cube"}
+          freeMode={{ enabled: isMobile && !isLandscape }}
+          grid={options.twoPage ? {
+            fill: "column",
+          } : undefined}
+          zoom={!isMobile}
+          autoHeight={isMobile}
+          keyboard={{ enabled: !isMobile }}
+          // TODO: zoom mode
+          modules={[FreeMode, Thumbs, Mousewheel, Scrollbar, Grid, Keyboard, EffectFade]}
+          fadeEffect={{ crossFade: true }}
+          onBeforeInit={(swiper) => {
+            swiperRef.current = swiper
+          }}
+          onActiveIndexChange={(swiper) => {
+            setActiveSlide(swiper.activeIndex + 1)
+            setZoomScale(1)
+          }}
+          className={clsx("big-swiper", {
+            "full-width": !showSmallSwiper,
+            "fit-width": fitWidth
+          })}
+          dir="rtl"
+        >
+          {slideDataImages.map((item, i) => {
+            return (
+              <SwiperSlide key={item.id}>
+                <div className="swiper-zoom-container">
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={1920}
+                    height={1080}
+                    priority={i < 2}
+                    className={clsx("aspect-video", {
+                      "slide-rotate-0": slideRotate === 0,
+                      "slide-rotate-90": slideRotate === 90,
+                      "slide-rotate-180": slideRotate === 180,
+                      "slide-rotate-270": slideRotate === 270,
+                      "fit-width": fitWidth,
+                      "not-fit-width": !fitWidth,
+                      "img-landscape": isLandscape
+                    })}
+                  />
+                </div>
+              </SwiperSlide>
+            )
+          })}
+        </Swiper>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      {/* active slide mobile */}
+      <div className="block lg:hidden absolute px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+        {activeSlide} / {slideDataImages.length}
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <button type="button" className="size-4 text-white rounded-full bg-red-500 absolute bottom-8 right-8 z-40" onClick={() => {
+        setIsLandscape(!isLandscape)
+      }}>Click me</button>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </main >
   );
 }

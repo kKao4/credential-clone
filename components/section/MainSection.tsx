@@ -534,7 +534,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 }
             }
             effect={isLandscape ? "creative" : ""}
-            freeMode={{ enabled: isLandscape, sticky: isLandscape, momentumRatio: 0.4, momentumBounceRatio: 0.4, momentumVelocityRatio: 0.4 }}
+            freeMode={{ enabled: isLandscape, sticky: isLandscape }}
             grid={
               options.twoPage
                 ? {

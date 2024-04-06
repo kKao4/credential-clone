@@ -104,6 +104,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   // close more options pop up
   useOnClickOutside(moreOptionRef, closeMoreOptions);
 
+  // lock portrait on mobile
+  useEffect(() => {
+    if (isMobileDevice) {
+      (screen.orientation as any).lock("portrait")
+    }
+  }, [isMobileDevice])
+
   // update zoom slide
   useEffect(() => {
     if (swiperRef.current) {

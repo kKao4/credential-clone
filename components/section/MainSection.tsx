@@ -113,8 +113,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   // set big swiper slide height dynamic
   useEffect(() => {
-    if (isClient) {
-      const x = Math.round(window.innerHeight / document.querySelector<HTMLElement>(".swiper-slide-image")!.offsetHeight)
+    const img = document.querySelector<HTMLElement>(".swiper-slide-image")
+    if (isClient && img) {
+      const x = Math.round(window.innerHeight / img.offsetHeight)
       setBigSwiperSide({ slidesPerView: x, slidesPerGroup: x })
     }
   }, [isClient])
@@ -629,7 +630,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </button>
         )}
       </main>
-      <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>
+      {isMobileDevice && <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>}
     </>
   );
 }

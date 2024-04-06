@@ -114,7 +114,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .big-swiper .swiper-slide img {
-  @apply block  h-full transition-300;
+  @apply block w-full transition-300;
 }
 
 .big-swiper .swiper-slide img.img-landscape {
@@ -140,8 +140,20 @@ input[type="number"]::-webkit-outer-spin-button {
   @apply rotate-[270deg] !important;
 }
 
-.initial-swiper {
+.initial-small-swiper {
   @apply flex flex-col gap-8 !important;
+}
+
+.initial-big-swiper {
+  @apply flex flex-col gap-1.5 !important;
+}
+
+.initial-big-swiper .swiper-slide {
+  @apply h-fit !important;
+}
+
+.initial-big-swiper .swiper-zoom-container {
+  @apply h-fit !important;
 }
 
 .big-swiper.fit-width .swiper-scrollbar-drag {

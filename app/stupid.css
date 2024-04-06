@@ -144,7 +144,7 @@ input[type="number"]::-webkit-outer-spin-button {
   @apply rotate-[270deg] !important;
 }
 
-.initial-swiper {
+.initial-small-swiper {
   @apply flex flex-col gap-8 !important;
 }
 

@@ -17,6 +17,9 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
+.transition-200 {
+  @apply transition-all duration-200 ease-out !important;
+}
 .transition-300 {
   @apply transition-all duration-300 ease-out !important;
 }
@@ -100,10 +103,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .big-swiper {
   @apply w-full h-full lg:w-[81%] bg-gray-main transition-300 !important;
 }
-
+/* 
 .big-swiper .swiper-wrapper {
-  @apply transition-400 !important;
-}
+  @apply transition-200 !important;
+} */
 
 .big-swiper.full-width {
   @apply w-screen h-full !important;
@@ -145,7 +148,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .initial-big-swiper {
-  @apply flex flex-col gap-1.5 !important;
+  @apply flex flex-col gap-1.5   !important;
 }
 
 .initial-big-swiper .swiper-slide {

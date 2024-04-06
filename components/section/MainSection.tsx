@@ -35,6 +35,7 @@ import { MdRotate90DegreesCcw, MdFullscreen } from "react-icons/md";
 import { TbArrowAutofitWidth } from "react-icons/tb";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
+  useIsClient,
   useOnClickOutside,
   useWindowSize,
 } from "usehooks-ts";
@@ -92,6 +93,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [options, setOptions] = useState({ twoPage: false, fullScreen: false });
   const { width } = useWindowSize();
   const [isLandscape, setIsLandscape] = useState(false);
+  const isClient = useIsClient()
+  const [bigSwiperSlide, setBigSwiperSide] = useState<{ slidesPerView: "auto" | number, slidesPerGroup: number }>({ slidesPerView: "auto", slidesPerGroup: 1 })
 
   // close more options
   const closeMoreOptions = () => {
@@ -107,6 +110,14 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       swiperRef.current.zoom.in(zoomScale);
     }
   }, [zoomScale]);
+
+  // set big swiper slide height dynamic
+  useEffect(() => {
+    if (isClient) {
+      const x = Math.round(window.innerHeight / document.querySelector<HTMLElement>(".swiper-slide-image")!.offsetHeight)
+      setBigSwiperSide({ slidesPerView: x, slidesPerGroup: x })
+    }
+  }, [isClient])
 
   // disable full screen
   useEffect(() => {
@@ -289,346 +300,336 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [isLandscape]);
 
-  // prevent user orientation
-  useEffect(() => {
-    const disableOrientation = () => {
-      if (window.innerHeight > window.innerWidth) {
-        document.getElementsByTagName("body")[0].style.transform =
-          "rotate(90deg)";
-      }
-    };
-    window.addEventListener("orientationchange", disableOrientation);
-    return () =>
-      window.removeEventListener("orientationchange", disableOrientation);
-  }, []);
-
   return (
-    <main
-      ref={mainRef}
-      className={clsx("relative bg-gray-main", {
-        "h-screen": !isLandscape,
-        "w-[100vh] h-[100vw]": isLandscape,
-      })}
-      style={
-        isLandscape
-          ? {
-            transform: "rotate(90deg) translateX(100%)",
-            transformOrigin: "top right",
-          }
-          : undefined
-      }
-    >
-      {/* header */}
-      <header
-        className="hidden lg:flex relative h-[7.5dvh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
-        style={{
-          boxShadow:
-            "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px",
-        }}
+    <>
+      <main
+        ref={mainRef}
+        className={clsx("portrait:block hidden relative bg-gray-main", {
+          "h-screen": !isLandscape,
+          "w-[100dvh] h-[100vw]": isLandscape,
+        })}
+        style={
+          isLandscape
+            ? {
+              transform: "rotate(90deg) translateX(100%)",
+              transformOrigin: "top right",
+            }
+            : undefined
+        }
       >
-        <div className="flex flex-row items-center">
-          {/* toggle small swiper */}
-          <ButtonIcon onClick={toggleSmallSwiper}>
-            <FaBars className="text-neutral-100 text-1.15" />
-          </ButtonIcon>
-
-          {/* file name */}
-          <strong className="text-1.15 ml-3 font-medium capitalize">
-            File Name
-          </strong>
-        </div>
-
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">
-          {/* form change active slide */}
-          <form
-            className="flex flex-row items-center mr-4"
-            onSubmit={(e) => handleChangeActiveSlide(e)}
-          >
-            <input
-              type="number"
-              className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
-              value={activeSlide}
-              onChange={(e) => handleChangeInputActiveSlide(e)}
-            />
-            <p className="text-0.75 text-white ml-1.5">/</p>
-            <p className="text-0.75 text-white ml-1.5">
-              {slideDataImages.length}
-            </p>
-          </form>
-
-          {/* divider */}
-          <HeaderDivider />
-
-          {/* form change zoom scale */}
-          <form
-            className="flex flex-row items-center mx-1.5"
-            onSubmit={(e) => handleChangeZoomSlide(e)}
-          >
-            <ButtonIcon
-              type="button"
-              onClick={handleMinusZoomSlide}
-              disabled={options.twoPage}
-            >
-              <FaMinus className="" />
+        {/* header */}
+        <header
+          className="hidden lg:flex relative h-[7.5dvh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
+          style={{
+            boxShadow:
+              "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px",
+          }}
+        >
+          <div className="flex flex-row items-center">
+            {/* toggle small swiper */}
+            <ButtonIcon onClick={toggleSmallSwiper}>
+              <FaBars className="text-neutral-100 text-1.15" />
             </ButtonIcon>
-            <input
-              type="text"
-              className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
-              value={`${Math.floor(zoomScale * 100)}%`}
-              onChange={(e) => handleChangeInputZoomSlide(e)}
-              disabled={options.twoPage}
-            />
-            <ButtonIcon
-              type="button"
-              onClick={handlePlusZoomSlide}
-              disabled={options.twoPage}
-            >
-              <FaPlus className="" />
-            </ButtonIcon>
-          </form>
 
-          {/* divider */}
-          <HeaderDivider />
-
-          {/* full width and rotate */}
-          <div className="flex flex-row items-center ml-4">
-            <ButtonIcon onClick={toggleFitWidth}>
-              <TbArrowAutofitWidth className="" />
-            </ButtonIcon>
-            <ButtonIcon onClick={handleRotateSlide}>
-              <MdRotate90DegreesCcw className="" />
-            </ButtonIcon>
+            {/* file name */}
+            <strong className="text-1.15 ml-3 font-medium capitalize">
+              File Name
+            </strong>
           </div>
-        </div>
 
-        {/* download, print */}
-        <div className="ml-auto flex flex-row items-center">
-          {/* more options */}
-          <div ref={moreOptionRef} className="relative ml-1.5">
-            {/* more options button */}
-            <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
-              <BsThreeDotsVertical className="" />
-            </ButtonIcon>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">
+            {/* form change active slide */}
+            <form
+              className="flex flex-row items-center mr-4"
+              onSubmit={(e) => handleChangeActiveSlide(e)}
+            >
+              <input
+                type="number"
+                className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
+                value={activeSlide}
+                onChange={(e) => handleChangeInputActiveSlide(e)}
+              />
+              <p className="text-0.75 text-white ml-1.5">/</p>
+              <p className="text-0.75 text-white ml-1.5">
+                {slideDataImages.length}
+              </p>
+            </form>
 
-            {/* more options pop up */}
+            {/* divider */}
+            <HeaderDivider />
+
+            {/* form change zoom scale */}
+            <form
+              className="flex flex-row items-center mx-1.5"
+              onSubmit={(e) => handleChangeZoomSlide(e)}
+            >
+              <ButtonIcon
+                type="button"
+                onClick={handleMinusZoomSlide}
+                disabled={options.twoPage}
+              >
+                <FaMinus className="" />
+              </ButtonIcon>
+              <input
+                type="text"
+                className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
+                value={`${Math.floor(zoomScale * 100)}%`}
+                onChange={(e) => handleChangeInputZoomSlide(e)}
+                disabled={options.twoPage}
+              />
+              <ButtonIcon
+                type="button"
+                onClick={handlePlusZoomSlide}
+                disabled={options.twoPage}
+              >
+                <FaPlus className="" />
+              </ButtonIcon>
+            </form>
+
+            {/* divider */}
+            <HeaderDivider />
+
+            {/* full width and rotate */}
+            <div className="flex flex-row items-center ml-4">
+              <ButtonIcon onClick={toggleFitWidth}>
+                <TbArrowAutofitWidth className="" />
+              </ButtonIcon>
+              <ButtonIcon onClick={handleRotateSlide}>
+                <MdRotate90DegreesCcw className="" />
+              </ButtonIcon>
+            </div>
+          </div>
+
+          {/* download, print */}
+          <div className="ml-auto flex flex-row items-center">
+            {/* more options */}
+            <div ref={moreOptionRef} className="relative ml-1.5">
+              {/* more options button */}
+              <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
+                <BsThreeDotsVertical className="" />
+              </ButtonIcon>
+
+              {/* more options pop up */}
+              <Transition
+                in={moreOptions}
+                timeout={moreOptionsTransitionDuration}
+              >
+                {(state) => (
+                  <div
+                    className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
+                    style={{
+                      ...moreOptionsDefaultStyle,
+                      ...moreOptionsTransitionStyles[state],
+                      boxShadow:
+                        "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                    }}
+                  >
+                    <ButtonOption
+                      isActive={options.twoPage}
+                      text="Chế độ xem hai trang"
+                      onClick={toggleTwoPageMode}
+                    />
+                    <div className="w-full my-1.5 h-px bg-neutral-700" />
+                    <ButtonOption
+                      text="Thuyết trình"
+                      isActive={options.fullScreen}
+                      onClick={toggleFullscreen}
+                    />
+                  </div>
+                )}
+              </Transition>
+            </div>
+          </div>
+        </header>
+
+        {moreOptions && (
+          <div className="hidden lg:block fixed w-screen overflow-hidden h-dvh z-10 bg-transparent" />
+        )}
+
+        {/* 2 swiper */}
+        <div className={clsx("h-full lg:h-[92.5dvh] w-full lg:flex flex-row lg:px-0", { "p-1.5": !isLandscape })}>
+          {/* small swiper */}
+          <div
+            className={clsx("hidden lg:block h-full transition-300", {
+              "w-[19%]": showSmallSwiper,
+              "w-0": !showSmallSwiper,
+            })}
+          >
             <Transition
-              in={moreOptions}
-              timeout={moreOptionsTransitionDuration}
+              in={showSmallSwiper}
+              timeout={smallSwiperTransitionDuration}
             >
               {(state) => (
-                <div
-                  className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
+                <Swiper
                   style={{
-                    ...moreOptionsDefaultStyle,
-                    ...moreOptionsTransitionStyles[state],
-                    boxShadow:
-                      "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                    ...smallSwiperDefaultStyle,
+                    ...smallSwiperTransitionStyles[state],
+                  }}
+                  onSwiper={setThumbsSwiper as any}
+                  slidesPerView="auto"
+                  speed={400}
+                  slidesPerGroup={5}
+                  spaceBetween={(width / 100) * 2}
+                  mousewheel={{ sensitivity: 2 }}
+                  direction="vertical"
+                  freeMode
+                  wrapperClass="swiper-wrapper initial-small-swiper"
+                  scrollbar={{
+                    enabled: true,
+                    draggable: true,
+                  }}
+                  modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
+                  className={clsx("small-swiper")}
+                  onAfterInit={() => {
+                    document
+                      .querySelectorAll(".swiper-wrapper")[0]
+                      ?.classList.remove("initial-small-swiper");
                   }}
                 >
-                  <ButtonOption
-                    isActive={options.twoPage}
-                    text="Chế độ xem hai trang"
-                    onClick={toggleTwoPageMode}
-                  />
-                  <div className="w-full my-1.5 h-px bg-neutral-700" />
-                  <ButtonOption
-                    text="Thuyết trình"
-                    isActive={options.fullScreen}
-                    onClick={toggleFullscreen}
-                  />
-                </div>
+                  {slideDataImages.map((item, i) => {
+                    return (
+                      <SwiperSlide key={item.id}>
+                        <Image
+                          src={item.src}
+                          alt={item.alt}
+                          width={1920}
+                          height={1080}
+                          priority={i < 5}
+                          className="aspect-video"
+                        />
+                        <p className="swiper-slide-text">{i + 1}</p>
+                      </SwiperSlide>
+                    );
+                  })}
+                </Swiper>
               )}
             </Transition>
           </div>
-        </div>
-      </header>
 
-      {moreOptions && (
-        <div className="hidden lg:block fixed w-screen overflow-hidden h-dvh z-10 bg-transparent" />
-      )}
-
-      {/* 2 swiper */}
-      <div className={clsx("h-full lg:h-[92.5dvh] w-full lg:flex flex-row lg:px-0", { "p-1.5": !isLandscape })}>
-        {/* small swiper */}
-        <div
-          className={clsx("hidden lg:block h-full transition-300", {
-            "w-[19%]": showSmallSwiper,
-            "w-0": !showSmallSwiper,
-          })}
-        >
-          <Transition
-            in={showSmallSwiper}
-            timeout={smallSwiperTransitionDuration}
-          >
-            {(state) => (
-              <Swiper
-                style={{
-                  ...smallSwiperDefaultStyle,
-                  ...smallSwiperTransitionStyles[state],
-                }}
-                onSwiper={setThumbsSwiper as any}
-                slidesPerView="auto"
-                speed={400}
-                slidesPerGroup={5}
-                spaceBetween={(width / 100) * 2}
-                mousewheel={{ sensitivity: 2 }}
-                direction="vertical"
-                freeMode
-                wrapperClass="swiper-wrapper initial-small-swiper"
-                scrollbar={{
+          {/* big swiper */}
+          <Swiper
+            key={isLandscape ? 2 : 1}
+            speed={400}
+            direction={options.twoPage ? "horizontal" : "vertical"}
+            thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
+            mousewheel={{ enabled: !isMobileDevice }}
+            spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
+            slidesPerView={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerView) : options.twoPage ? 2 : 1}
+            slidesPerGroup={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerGroup) : options.twoPage ? 2 : 1}
+            scrollbar={
+              isMobileDevice
+                ? false
+                : {
                   enabled: true,
                   draggable: true,
-                }}
-                modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
-                className={clsx("small-swiper")}
-                onAfterInit={() => {
-                  document
-                    .querySelectorAll(".swiper-wrapper")[0]
-                    ?.classList.remove("initial-small-swiper");
-                }}
-              >
-                {slideDataImages.map((item, i) => {
-                  return (
-                    <SwiperSlide key={item.id}>
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        width={1920}
-                        height={1080}
-                        priority={i < 5}
-                        className="aspect-video"
-                      />
-                      <p className="swiper-slide-text">{i + 1}</p>
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
-            )}
-          </Transition>
+                }
+            }
+            effect={isLandscape ? "creative" : ""}
+            freeMode={{ enabled: isLandscape, sticky: isLandscape, momentumRatio: 0.4, momentumBounceRatio: 0.4, momentumVelocityRatio: 0.4 }}
+            grid={
+              options.twoPage
+                ? {
+                  fill: "column",
+                }
+                : undefined
+            }
+            zoom={!isMobileDevice}
+            autoHeight={isMobileDevice}
+            keyboard={{ enabled: !isMobileDevice }}
+            modules={[
+              FreeMode,
+              Thumbs,
+              Mousewheel,
+              Scrollbar,
+              Grid,
+              Keyboard,
+              EffectCreative,
+              Zoom,
+            ]}
+            creativeEffect={{
+              next: {
+                translate: ["100%", 0, 0],
+              },
+              prev: {
+                translate: ["-100%", 0, 0],
+              },
+              limitProgress: slideDataImages.length
+            }}
+            onBeforeInit={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            onActiveIndexChange={(swiper) => {
+              setActiveSlide(swiper.activeIndex + 1);
+              setZoomScale(1);
+            }}
+            wrapperClass="swiper-wrapper initial-big-swiper"
+            onAfterInit={() => {
+              document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+            }}
+            className={clsx("big-swiper", {
+              "full-width": !showSmallSwiper,
+              "fit-width": fitWidth,
+            })}
+          >
+            {slideDataImages.map((item, i) => {
+              return (
+                <SwiperSlide key={item.id}>
+                  <div className="swiper-zoom-container">
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      width={1920}
+                      height={1080}
+                      priority={i < 2}
+                      className={clsx("swiper-slide-image aspect-video", {
+                        "slide-rotate-0": slideRotate === 0,
+                        "slide-rotate-90": slideRotate === 90,
+                        "slide-rotate-180": slideRotate === 180,
+                        "slide-rotate-270": slideRotate === 270,
+                        "fit-width": fitWidth,
+                        "not-fit-width": !fitWidth,
+                        "img-landscape": isLandscape,
+                      })}
+                    />
+                  </div>
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+          {/* prev/next button full screen mode mobile  */}
+          {isLandscape && isMobileDevice && (
+            <>
+              <button className="absolute top-1/2 -translate-y-1/2 left-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
+                <FaChevronLeft className="text-white/80 text-[2.5rem]" />
+              </button>
+              <button className="absolute top-1/2 -translate-y-1/2 right-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
+                <FaChevronRight className="text-white/80 text-[2.5rem]" />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* big swiper */}
-        <Swiper
-          key={isLandscape ? 2 : 1}
-          speed={400}
-          direction={options.twoPage ? "horizontal" : "vertical"}
-          thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
-          mousewheel={{ enabled: true }}
-          spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
-          slidesPerView={isMobileDevice ? "auto" : options.twoPage ? 2 : 1}
-          slidesPerGroup={isMobileDevice ? 1 : options.twoPage ? 2 : 1}
-          scrollbar={
-            isMobileDevice
-              ? false
-              : {
-                enabled: true,
-                draggable: true,
-              }
-          }
-          effect={isLandscape ? "creative" : ""}
-          freeMode={{ enabled: isMobileDevice, sticky: isLandscape, momentumRatio: isLandscape ? 0.2 : 2, momentumBounceRatio: isLandscape ? 0.2 : 2, minimumVelocity: isLandscape ? 0.2 : 2 }}
-          grid={
-            options.twoPage
-              ? {
-                fill: "column",
-              }
-              : undefined
-          }
-          zoom={!isMobileDevice}
-          autoHeight={isMobileDevice}
-          keyboard={{ enabled: !isMobileDevice }}
-          modules={[
-            FreeMode,
-            Thumbs,
-            Mousewheel,
-            Scrollbar,
-            Grid,
-            Keyboard,
-            EffectCreative,
-            Zoom,
-          ]}
-          creativeEffect={{
-            next: {
-              translate: ["100%", 0, 0],
-            },
-            prev: {
-              translate: ["-100%", 0, 0],
-            },
-            limitProgress: slideDataImages.length
-          }}
-          onBeforeInit={(swiper) => {
-            swiperRef.current = swiper;
-          }}
-          onActiveIndexChange={(swiper) => {
-            setActiveSlide(swiper.activeIndex + 1);
-            setZoomScale(1);
-          }}
-          wrapperClass="swiper-wrapper initial-big-swiper"
-          onAfterInit={() => {
-            document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
-          }}
-          className={clsx("big-swiper", {
-            "full-width": !showSmallSwiper,
-            "fit-width": fitWidth,
-          })}
-        >
-          {slideDataImages.map((item, i) => {
-            return (
-              <SwiperSlide key={item.id}>
-                <div className="swiper-zoom-container">
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    width={1920}
-                    height={1080}
-                    priority={i < 2}
-                    className={clsx("aspect-video", {
-                      "slide-rotate-0": slideRotate === 0,
-                      "slide-rotate-90": slideRotate === 90,
-                      "slide-rotate-180": slideRotate === 180,
-                      "slide-rotate-270": slideRotate === 270,
-                      "fit-width": fitWidth,
-                      "not-fit-width": !fitWidth,
-                      "img-landscape": isLandscape,
-                    })}
-                  />
-                </div>
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-        {/* prev/next button full screen mode mobile  */}
-        {isLandscape && isMobileDevice && (
-          <>
-            <button className="absolute top-1/2 -translate-y-1/2 left-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
-              <FaChevronLeft className="text-white/80 text-[2.5rem]" />
-            </button>
-            <button className="absolute top-1/2 -translate-y-1/2 right-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
-              <FaChevronRight className="text-white/80 text-[2.5rem]" />
-            </button>
-          </>
+        {/* active slide mobile */}
+        {isMobileDevice && (
+          <div className="block lg:hidden absolute px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+            {activeSlide} / {slideDataImages.length}
+          </div>
         )}
-      </div>
 
-      {/* active slide mobile */}
-      {isMobileDevice && (
-        <div className="block lg:hidden absolute px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
-          {activeSlide} / {slideDataImages.length}
-        </div>
-      )}
-
-      {/* full screen mobile btn */}
-      {isMobileDevice && (
-        <button
-          type="button"
-          className="flex md:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
-          onClick={() => {
-            setIsLandscape(!isLandscape);
-          }}
-        >
-          <MdFullscreen className="text-[1.5rem] text-black/80" />
-        </button>
-      )}
-    </main>
+        {/* full screen mobile btn */}
+        {isMobileDevice && (
+          <button
+            type="button"
+            className="flex md:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+            onClick={() => {
+              setIsLandscape(!isLandscape);
+            }}
+          >
+            <MdFullscreen className="text-[1.5rem] text-black/80" />
+          </button>
+        )}
+      </main>
+      <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>
+    </>
   );
 }

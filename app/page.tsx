@@ -28,18 +28,17 @@ import clsx from "clsx";
 import { Swiper as SwiperType } from "swiper/types";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { FaMinus, FaPlus, FaChevronLeft } from "react-icons/fa6";
 import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
-import { MdRotate90DegreesCcw } from "react-icons/md";
+import { MdRotate90DegreesCcw, MdFullscreen } from "react-icons/md";
 import { TbArrowAutofitWidth } from "react-icons/tb";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   useIsClient,
   useOnClickOutside,
   useWindowSize,
-  useScrollLock,
 } from "usehooks-ts";
 import ButtonOption from "@/components/button/ButtonOption";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -93,10 +92,6 @@ export default function Home() {
   const { width } = useWindowSize();
   const isMobile = useIsMobile();
   const [isLandscape, setIsLandscape] = useState(false);
-  const { lock, unlock } = useScrollLock({
-    autoLock: false,
-    lockTarget: document.body,
-  });
 
   // close more options
   const closeMoreOptions = () => {
@@ -266,14 +261,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // const preventDefaultScroll = (e: any) => {
-    //   demoRef.current?.scrollIntoView();
-    // };
     const preventDefaultScroll = (e: any) => {
       e.preventDefault();
-    };
-    const allowDefaultScroll = (e: any) => {
-      return;
     };
     if (isLandscape) {
       demoRef.current?.scrollIntoView();
@@ -289,8 +278,6 @@ export default function Home() {
       window.addEventListener("touchmove", preventDefaultScroll, {
         passive: false,
       });
-      // document.documentElement.style.overflowY = "hidden"
-      // document.body.style.overflowY = "hidden"
       swiperRef.current?.update();
     } else {
       window.removeEventListener("wheel", preventDefaultScroll);
@@ -299,9 +286,7 @@ export default function Home() {
       window.removeEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     }
-  }, [isLandscape, lock, unlock]);
-
-  console.log(isMobile && !isLandscape);
+  }, [isLandscape]);
 
   useEffect(() => {
     const disableOrientation = () => {
@@ -325,9 +310,9 @@ export default function Home() {
       style={
         isLandscape
           ? {
-              transform: "rotate(90deg) translateX(100%)",
-              transformOrigin: "top right",
-            }
+            transform: "rotate(90deg) translateX(100%)",
+            transformOrigin: "top right",
+          }
           : undefined
       }
     >
@@ -472,7 +457,6 @@ export default function Home() {
           <Transition
             in={showSmallSwiper}
             timeout={smallSwiperTransitionDuration}
-            unmountOnExit
           >
             {(state) => (
               <Swiper
@@ -535,17 +519,17 @@ export default function Home() {
             isMobile
               ? false
               : {
-                  enabled: true,
-                  draggable: true,
-                }
+                enabled: true,
+                draggable: true,
+              }
           }
           effect={isLandscape ? "fade" : "cube"}
           freeMode={{ enabled: isMobile }}
           grid={
             options.twoPage
               ? {
-                  fill: "column",
-                }
+                fill: "column",
+              }
               : undefined
           }
           zoom={!isMobile}
@@ -600,6 +584,13 @@ export default function Home() {
             );
           })}
         </Swiper>
+        {isLandscape && (
+          <>
+            <button className="absolute top-1/2 -translate-y-1/2 left-4 px-4 py-1.5 bg-gradient-to-r from-white/60 to-white/40 z-40 flex justify-center items-center">
+              <FaChevronLeft className="text-black/80 text-[2rem]" />
+            </button>
+          </>
+        )}
       </div>
 
       {/* active slide mobile */}
@@ -609,12 +600,12 @@ export default function Home() {
 
       <button
         type="button"
-        className="size-8 text-white rounded-full bg-red-500 absolute bottom-8 right-8 z-40"
+        className="flex md:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
         onClick={() => {
           setIsLandscape(!isLandscape);
         }}
       >
-        Click me
+        <MdFullscreen className="text-[1.5rem] text-black/80" />
       </button>
     </main>
   );

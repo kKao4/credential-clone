@@ -114,11 +114,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   // set big swiper slide height dynamic
   useEffect(() => {
     const img = document.querySelector<HTMLElement>(".swiper-slide-image")
-    if (isClient && img) {
+    if (isClient && img && isMobileDevice) {
       const x = Math.round(window.innerHeight / img.offsetHeight)
       setBigSwiperSide({ slidesPerView: x, slidesPerGroup: x })
     }
-  }, [isClient])
+  }, [isClient, isMobileDevice])
 
   // disable full screen
   useEffect(() => {
@@ -305,9 +305,10 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     <>
       <main
         ref={mainRef}
-        className={clsx("portrait:block hidden relative bg-gray-main", {
+        className={clsx("relative bg-gray-main", {
           "h-screen": !isLandscape,
           "w-[100dvh] h-[100vw]": isLandscape,
+          "portrait:block hidden": isMobileDevice
         })}
         style={
           isLandscape
@@ -448,7 +449,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         )}
 
         {/* 2 swiper */}
-        <div className={clsx("h-full lg:h-[92.5dvh] w-full lg:flex flex-row lg:px-0", { "p-1.5": !isLandscape })}>
+        <div className={clsx("h-full lg:h-[92.5dvh] w-full lg:flex flex-row lg:p-0", { "p-1.5": !isLandscape })}>
           {/* small swiper */}
           <div
             className={clsx("hidden lg:block h-full transition-300", {

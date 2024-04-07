@@ -575,6 +575,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               "full-width": !showSmallSwiper,
               "fit-width": fitWidth,
             })}
+            touchReleaseOnEdges
           >
             {slideDataImages.map((item, i) => {
               return (

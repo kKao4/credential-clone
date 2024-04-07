@@ -96,6 +96,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const isClient = useIsClient()
   const [bigSwiperSlide, setBigSwiperSide] = useState<{ slidesPerView: "auto" | number, slidesPerGroup: number }>({ slidesPerView: "auto", slidesPerGroup: 1 })
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
+  const [key, setKey] = useState(0)
 
   // close more options
   const closeMoreOptions = () => {
@@ -318,6 +319,10 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     return () => window.removeEventListener("orientationchange", detectOrientation)
   }, [])
 
+  useEffect(() => {
+    setKey(prevState => prevState + 1)
+  }, [isLandscape, isMobileLandscape])
+
   return (
     <>
       <main
@@ -525,7 +530,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
           {/* big swiper */}
           <Swiper
-            key={isLandscape ? 2 : 1}
+            key={key}
             speed={400}
             direction={options.twoPage && !isMobileLandscape ? "horizontal" : "vertical"}
             thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}

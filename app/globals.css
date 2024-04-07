@@ -26,9 +26,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .transition-400 {
   @apply transition-all duration-400 ease-out !important;
 }
-.transition-1200 {
-  @apply transition-all duration-1200 ease-out !important;
-}
 
 .small-swiper {
   @apply h-full px-20 py-6 bg-gray-main transition-400 !important;
@@ -103,10 +100,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .big-swiper {
   @apply w-full h-full lg:w-[81%] bg-gray-main transition-300 !important;
 }
-/* 
-.big-swiper .swiper-wrapper {
-  @apply transition-200 !important;
-} */
 
 .big-swiper.full-width {
   @apply w-screen h-full !important;

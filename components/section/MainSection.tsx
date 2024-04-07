@@ -307,7 +307,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       window.removeEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     }
-  }, [isLandscape]);
+  }, [isLandscape, isMobileLandscape]);
 
   // detect user rotate in mobile device
   useEffect(() => {

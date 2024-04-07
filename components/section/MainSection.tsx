@@ -285,7 +285,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     const preventDefaultScroll = (e: any) => {
       e.preventDefault();
     };
-    if (isLandscape) {
+    if (isLandscape && !isMobileLandscape) {
       mainRef.current?.scrollIntoView();
       window.addEventListener("wheel", preventDefaultScroll, {
         passive: false,

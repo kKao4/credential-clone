@@ -27,7 +27,7 @@ import clsx from "clsx";
 import { Swiper as SwiperType } from "swiper/types";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
-import { FaMinus, FaPlus, FaChevronLeft, FaChevronRight } from "react-icons/fa6";
+import { FaMinus, FaPlus, FaChevronLeft, FaChevronRight, FaChevronDown, FaChevronUp } from "react-icons/fa6";
 import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
@@ -95,6 +95,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [isLandscape, setIsLandscape] = useState(false);
   const isClient = useIsClient()
   const [bigSwiperSlide, setBigSwiperSide] = useState<{ slidesPerView: "auto" | number, slidesPerGroup: number }>({ slidesPerView: "auto", slidesPerGroup: 1 })
+  const [isMobileLandscape, setIsMobileLandscape] = useState(false)
 
   // close more options
   const closeMoreOptions = () => {
@@ -308,17 +309,25 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [isLandscape]);
 
+  // detect user rotate in mobile device
+  useEffect(() => {
+    const detectOrientation = () => {
+      setIsMobileLandscape(screen.orientation.type.includes("landscape"))
+    }
+    window.addEventListener("orientationchange", detectOrientation)
+    return () => window.removeEventListener("orientationchange", detectOrientation)
+  }, [])
+
   return (
     <>
       <main
         ref={mainRef}
         className={clsx("relative bg-gray-main", {
           "h-screen": !isLandscape,
-          "w-[100dvh] h-[100vw]": isLandscape,
-          // "portrait:block hidden": isMobileDevice
+          "w-[100dvh] h-[100vw]": isLandscape && !isMobileLandscape,
         })}
         style={
-          isLandscape
+          isLandscape && !isMobileLandscape
             ? {
               transform: "rotate(90deg) translateX(100%)",
               transformOrigin: "top right",
@@ -504,7 +513,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                           width={1920}
                           height={1080}
                           priority={i < 5}
-                          className="aspect-video"
                         />
                         <p className="swiper-slide-text">{i + 1}</p>
                       </SwiperSlide>
@@ -519,7 +527,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           <Swiper
             key={isLandscape ? 2 : 1}
             speed={400}
-            direction={options.twoPage ? "horizontal" : "vertical"}
+            direction={options.twoPage && !isMobileLandscape ? "horizontal" : "vertical"}
             thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
             mousewheel={{ enabled: !isMobileDevice }}
             spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
@@ -529,7 +537,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               enabled: !isMobileDevice,
               draggable: true,
             }}
-            effect={isLandscape ? "creative" : ""}
+            effect={isLandscape && !isMobileLandscape ? "creative" : ""}
             freeMode={{ enabled: isMobileDevice, sticky: isLandscape }}
             grid={
               options.twoPage
@@ -551,7 +559,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               EffectCreative,
               Zoom,
             ]}
-            creativeEffect={{
+            creativeEffect={isMobileLandscape ? undefined : {
               next: {
                 translate: ["100%", 0, 0],
               },
@@ -570,6 +578,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             wrapperClass="swiper-wrapper initial-big-swiper"
             onAfterInit={() => {
               document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+              setIsMobileLandscape(screen.orientation.type.includes("landscape"))
             }}
             className={clsx("big-swiper", {
               "full-width": !showSmallSwiper,
@@ -587,14 +596,15 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                       width={1920}
                       height={1080}
                       priority={i < 2}
-                      className={clsx("swiper-slide-image aspect-video", {
+                      className={clsx("swiper-slide-image", {
                         "slide-rotate-0": slideRotate === 0,
                         "slide-rotate-90": slideRotate === 90,
                         "slide-rotate-180": slideRotate === 180,
                         "slide-rotate-270": slideRotate === 270,
                         "fit-width": fitWidth,
                         "not-fit-width": !fitWidth,
-                        "img-landscape": isLandscape,
+                        "img-landscape": isLandscape && !isMobileLandscape,
+                        "img-mobile-landscape": isMobileLandscape
                       })}
                     />
                   </div>
@@ -603,13 +613,25 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             })}
           </Swiper>
           {/* prev/next button full screen mode mobile  */}
-          {isLandscape && isMobileDevice && (
+          {isLandscape && isMobileDevice && !isMobileLandscape && (
             <>
               <button className="absolute top-1/2 -translate-y-1/2 left-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
                 <FaChevronLeft className="text-white/80 text-[2.5rem]" />
               </button>
               <button className="absolute top-1/2 -translate-y-1/2 right-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
                 <FaChevronRight className="text-white/80 text-[2.5rem]" />
+              </button>
+            </>
+          )}
+
+          {/* prev/next button full screen mode mobile  */}
+          {isLandscape && isMobileDevice && isMobileLandscape && (
+            <>
+              <button className="absolute top-2.5 -translate-x-1/2 left-1/2 py-1 px-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
+                <FaChevronUp className="text-white/80 text-[2.5rem]" />
+              </button>
+              <button className="absolute bottom-2.5 -translate-x-1/2 left-1/2 py-1 px-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
+                <FaChevronDown className="text-white/80 text-[2.5rem]" />
               </button>
             </>
           )}

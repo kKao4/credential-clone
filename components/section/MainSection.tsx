@@ -523,7 +523,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
             mousewheel={{ enabled: !isMobileDevice }}
             spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
-            slidesPerView={isMobileDevice ? "auto" : options.twoPage ? 2 : 1}
+            slidesPerView={isMobileDevice ? 4 : options.twoPage ? 2 : 1}
             slidesPerGroup={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerGroup) : options.twoPage ? 2 : 1}
             scrollbar={
               isMobileDevice

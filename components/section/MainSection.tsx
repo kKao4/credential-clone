@@ -525,6 +525,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
             slidesPerView={isMobileDevice ? 4 : options.twoPage ? 2 : 1}
             slidesPerGroup={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerGroup) : options.twoPage ? 2 : 1}
+            style={isMobileDevice && isClient ? { height: window.innerHeight } : undefined}
             scrollbar={
               isMobileDevice
                 ? false

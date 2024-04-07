@@ -523,16 +523,12 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
             mousewheel={{ enabled: !isMobileDevice }}
             spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
-            slidesPerView={isMobileDevice ? 4 : options.twoPage ? 2 : 1}
+            slidesPerView={isMobileDevice ? "auto" : options.twoPage ? 2 : 1}
             slidesPerGroup={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerGroup) : options.twoPage ? 2 : 1}
-            scrollbar={
-              isMobileDevice
-                ? false
-                : {
-                  enabled: true,
-                  draggable: true,
-                }
-            }
+            scrollbar={{
+              enabled: !isMobileDevice,
+              draggable: true,
+            }}
             effect={isLandscape ? "creative" : ""}
             freeMode={{ enabled: isMobileDevice, sticky: isLandscape }}
             grid={
@@ -638,7 +634,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </button>
         )}
       </main>
-      {isMobileDevice && <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>}
+      {/* {isMobileDevice && <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>} */}
     </>
   );
 }

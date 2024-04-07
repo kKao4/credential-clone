@@ -315,7 +315,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         className={clsx("relative bg-gray-main", {
           "h-screen": !isLandscape,
           "w-[100dvh] h-[100vw]": isLandscape,
-          "portrait:block hidden": isMobileDevice
+          // "portrait:block hidden": isMobileDevice
         })}
         style={
           isLandscape
@@ -626,7 +626,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {isMobileDevice && (
           <button
             type="button"
-            className="flex md:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+            className="flex lg:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
             onClick={() => {
               setIsLandscape(!isLandscape);
             }}
@@ -635,7 +635,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </button>
         )}
       </main>
-      {/* {isMobileDevice && <p className="text-white text-[3rem] text-center p-4">Trang web chỉ chạy tốt ở chế độ dọc. Vui lòng xoay dọc để sử dụng tiếp tính năng.</p>} */}
     </>
   );
 }

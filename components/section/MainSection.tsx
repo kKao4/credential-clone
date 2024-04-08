@@ -270,7 +270,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       e.preventDefault();
     };
     if (isLandscape && !isMobileLandscape) {
-      mainRef.current?.scrollIntoView();
+      mainRef.current?.scrollIntoView(true);
       window.addEventListener("wheel", preventDefaultScroll, {
         passive: false,
       });

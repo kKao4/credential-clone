@@ -276,23 +276,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     };
     if (isLandscape && !isMobileLandscape) {
       mainRef.current?.scrollIntoView();
-      window.addEventListener("wheel", preventDefaultScroll, {
-        passive: false,
-      });
-      window.addEventListener("mousewheel", preventDefaultScroll, {
-        passive: false,
-      });
-      window.addEventListener("DOMMouseScroll", preventDefaultScroll, {
-        passive: false,
-      });
       window.addEventListener("touchmove", preventDefaultScroll, {
         passive: false,
       });
       swiperRef.current?.update();
     } else {
-      window.removeEventListener("wheel", preventDefaultScroll);
-      window.removeEventListener("mousewheel", preventDefaultScroll);
-      window.removeEventListener("DOMMouseScroll", preventDefaultScroll);
       window.removeEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     }

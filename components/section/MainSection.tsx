@@ -276,9 +276,23 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     };
     if (isLandscape && !isMobileLandscape) {
       mainRef.current?.scrollIntoView();
-      window.addEventListener("touchmove", preventDefaultScroll);
+      window.addEventListener("wheel", preventDefaultScroll, {
+        passive: false,
+      });
+      window.addEventListener("mousewheel", preventDefaultScroll, {
+        passive: false,
+      });
+      window.addEventListener("DOMMouseScroll", preventDefaultScroll, {
+        passive: false,
+      });
+      window.addEventListener("touchmove", preventDefaultScroll, {
+        passive: false,
+      });
       swiperRef.current?.update();
     } else {
+      window.removeEventListener("wheel", preventDefaultScroll);
+      window.removeEventListener("mousewheel", preventDefaultScroll);
+      window.removeEventListener("DOMMouseScroll", preventDefaultScroll);
       window.removeEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     }
@@ -287,7 +301,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   // detect user rotate in mobile device
   useEffect(() => {
     const detectOrientation = () => {
-      setIsMobileLandscape(screen.orientation.type.includes("landscape"))
+      setIsMobileLandscape(screen.availHeight < screen.availWidth)
     }
     window.addEventListener("orientationchange", detectOrientation)
     return () => window.removeEventListener("orientationchange", detectOrientation)

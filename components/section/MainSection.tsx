@@ -319,7 +319,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           isLandscape && !isMobileLandscape
             ? {
               transform: "rotate(90deg) translateX(100%)",
-              transformOrigin: "top right",
             }
             : undefined
         }

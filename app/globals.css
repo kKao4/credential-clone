@@ -114,7 +114,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .big-swiper .swiper-slide img.img-landscape {
-  @apply w-[100vh] h-[100vw];
+  @apply w-screen h-screen;
 }
 
 .big-swiper .swiper-slide img.img-mobile-landscape {

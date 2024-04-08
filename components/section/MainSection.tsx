@@ -276,9 +276,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     };
     if (isLandscape && !isMobileLandscape) {
       mainRef.current?.scrollIntoView();
-      window.addEventListener("touchmove", preventDefaultScroll, {
-        passive: false,
-      });
+      window.addEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     } else {
       window.removeEventListener("touchmove", preventDefaultScroll);

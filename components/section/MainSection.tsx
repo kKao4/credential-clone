@@ -335,7 +335,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   return (
     <>
-      <main className="relative bg-gray-main w-full flex items-end">
+      <main className="relative bg-gray-main h-screen">
         {/* header */}
         {!isMobileDevice && (
           <header
@@ -615,7 +615,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   <Image
                     src={item.src}
                     alt={item.alt}
-                    className={clsx("image block mx-auto", {
+                    className={clsx("image", {
                       "w-full object-cover": !isLandscape,
                       "h-[100vw] object-contain": isLandscape && !isMobileLandscape
                     })}

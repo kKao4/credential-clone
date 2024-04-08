@@ -615,9 +615,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   <Image
                     src={item.src}
                     alt={item.alt}
-                    className={clsx("image", {
+                    className={clsx("image block mx-auto", {
                       "w-full object-cover": !isLandscape,
-                      "h-[100vw] object-contain": isLandscape && !isMobileLandscape
+                      "h-full object-contain": isLandscape && !isMobileLandscape
                     })}
                     width={1920}
                     height={1080}

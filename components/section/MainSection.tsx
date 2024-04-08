@@ -313,7 +313,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         ref={mainRef}
         className={clsx("relative bg-gray-main", {
           "h-screen": !isLandscape,
-          "w-screen h-screen": isLandscape && !isMobileLandscape,
+          "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape,
         })}
         style={
           isLandscape && !isMobileLandscape

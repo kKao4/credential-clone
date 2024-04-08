@@ -267,7 +267,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      htmlElement.style.width = screen.availHeight + "px";
+      htmlElement.style.width = "100vh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
@@ -335,7 +335,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   return (
     <>
-      <main className="relative bg-gray-main">
+      <main className="relative bg-gray-main h-screen">
         {/* header */}
         {!isMobileDevice && (
           <header
@@ -607,10 +607,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {isMobileDevice && (
           <div key={isLandscape ? 2 : 1} className={clsx("image-container relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
             "h-screen": !isLandscape,
-            "h-[100vw]": isLandscape && !isMobileLandscape
-          })}
-            style={isLandscape && !isMobileLandscape ? { width: screen.availHeight + "px" } : undefined}
-          >
+            "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
+          })}>
             {slideDataImages.map((item, i) => {
               return (
                 <div key={item.id} className="flex justify-center items-center mx-auto">

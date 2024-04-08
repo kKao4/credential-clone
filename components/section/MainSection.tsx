@@ -92,7 +92,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const { width } = useWindowSize();
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
-  console.log("🚀 ~ MainSection ~ isMobileLandscape:", isMobileLandscape)
   const isClient = useIsClient()
 
   // close more options
@@ -288,8 +287,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     const detectOrientation = () => {
       setIsMobileLandscape(screen.availHeight < screen.availWidth)
     }
+    detectOrientation()
     window.addEventListener("resize", detectOrientation)
-    return () => window.removeEventListener("resize", detectOrientation)
+    return () => {
+      window.removeEventListener("resize", detectOrientation)
+    }
   }, [])
 
   // calculate active img
@@ -336,136 +338,138 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     <>
       <main className="relative bg-gray-main">
         {/* header */}
-        <header
-          className="hidden lg:flex relative h-[7.5vh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
-          style={{
-            boxShadow:
-              "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px",
-          }}
-        >
-          <div className="flex flex-row items-center">
-            {/* toggle small swiper */}
-            <ButtonIcon onClick={toggleSmallSwiper}>
-              <FaBars className="text-neutral-100 text-1.15" />
-            </ButtonIcon>
-
-            {/* file name */}
-            <strong className="text-1.15 ml-3 font-medium capitalize">
-              File Name
-            </strong>
-          </div>
-
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">
-            {/* form change active slide */}
-            <form
-              className="flex flex-row items-center mr-4"
-              onSubmit={(e) => handleChangeActiveSlide(e)}
-            >
-              <input
-                type="number"
-                className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
-                value={activeSlide}
-                onChange={(e) => handleChangeInputActiveSlide(e)}
-              />
-              <p className="text-0.75 text-white ml-1.5">/</p>
-              <p className="text-0.75 text-white ml-1.5">
-                {slideDataImages.length}
-              </p>
-            </form>
-
-            {/* divider */}
-            <HeaderDivider />
-
-            {/* form change zoom scale */}
-            <form
-              className="flex flex-row items-center mx-1.5"
-              onSubmit={(e) => handleChangeZoomSlide(e)}
-            >
-              <ButtonIcon
-                type="button"
-                onClick={handleMinusZoomSlide}
-                disabled={options.twoPage}
-              >
-                <FaMinus className="" />
+        {!isMobileDevice && (
+          <header
+            className="flex relative h-[7.5vh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
+            style={{
+              boxShadow:
+                "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px",
+            }}
+          >
+            <div className="flex flex-row items-center">
+              {/* toggle small swiper */}
+              <ButtonIcon onClick={toggleSmallSwiper}>
+                <FaBars className="text-neutral-100 text-1.15" />
               </ButtonIcon>
-              <input
-                type="text"
-                className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
-                value={`${Math.floor(zoomScale * 100)}%`}
-                onChange={(e) => handleChangeInputZoomSlide(e)}
-                disabled={options.twoPage}
-              />
-              <ButtonIcon
-                type="button"
-                onClick={handlePlusZoomSlide}
-                disabled={options.twoPage}
-              >
-                <FaPlus className="" />
-              </ButtonIcon>
-            </form>
 
-            {/* divider */}
-            <HeaderDivider />
-
-            {/* full width and rotate */}
-            <div className="flex flex-row items-center ml-4">
-              <ButtonIcon onClick={toggleFitWidth}>
-                <TbArrowAutofitWidth className="" />
-              </ButtonIcon>
-              <ButtonIcon onClick={handleRotateSlide}>
-                <MdRotate90DegreesCcw className="" />
-              </ButtonIcon>
+              {/* file name */}
+              <strong className="text-1.15 ml-3 font-medium capitalize">
+                File Name
+              </strong>
             </div>
-          </div>
 
-          {/* download, print */}
-          <div className="ml-auto flex flex-row items-center">
-            {/* more options */}
-            <div ref={moreOptionRef} className="relative ml-1.5">
-              {/* more options button */}
-              <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
-                <BsThreeDotsVertical className="" />
-              </ButtonIcon>
-
-              {/* more options pop up */}
-              <Transition
-                in={moreOptions}
-                timeout={moreOptionsTransitionDuration}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">
+              {/* form change active slide */}
+              <form
+                className="flex flex-row items-center mr-4"
+                onSubmit={(e) => handleChangeActiveSlide(e)}
               >
-                {(state) => (
-                  <div
-                    className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
-                    style={{
-                      ...moreOptionsDefaultStyle,
-                      ...moreOptionsTransitionStyles[state],
-                      boxShadow:
-                        "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
-                    }}
-                  >
-                    <ButtonOption
-                      isActive={options.twoPage}
-                      text="Chế độ xem hai trang"
-                      onClick={toggleTwoPageMode}
-                    />
-                    <div className="w-full my-1.5 h-px bg-neutral-700" />
-                    <ButtonOption
-                      text="Thuyết trình"
-                      isActive={options.fullScreen}
-                      onClick={toggleFullscreen}
-                    />
-                  </div>
-                )}
-              </Transition>
+                <input
+                  type="number"
+                  className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
+                  value={activeSlide}
+                  onChange={(e) => handleChangeInputActiveSlide(e)}
+                />
+                <p className="text-0.75 text-white ml-1.5">/</p>
+                <p className="text-0.75 text-white ml-1.5">
+                  {slideDataImages.length}
+                </p>
+              </form>
+
+              {/* divider */}
+              <HeaderDivider />
+
+              {/* form change zoom scale */}
+              <form
+                className="flex flex-row items-center mx-1.5"
+                onSubmit={(e) => handleChangeZoomSlide(e)}
+              >
+                <ButtonIcon
+                  type="button"
+                  onClick={handleMinusZoomSlide}
+                  disabled={options.twoPage}
+                >
+                  <FaMinus className="" />
+                </ButtonIcon>
+                <input
+                  type="text"
+                  className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
+                  value={`${Math.floor(zoomScale * 100)}%`}
+                  onChange={(e) => handleChangeInputZoomSlide(e)}
+                  disabled={options.twoPage}
+                />
+                <ButtonIcon
+                  type="button"
+                  onClick={handlePlusZoomSlide}
+                  disabled={options.twoPage}
+                >
+                  <FaPlus className="" />
+                </ButtonIcon>
+              </form>
+
+              {/* divider */}
+              <HeaderDivider />
+
+              {/* full width and rotate */}
+              <div className="flex flex-row items-center ml-4">
+                <ButtonIcon onClick={toggleFitWidth}>
+                  <TbArrowAutofitWidth className="" />
+                </ButtonIcon>
+                <ButtonIcon onClick={handleRotateSlide}>
+                  <MdRotate90DegreesCcw className="" />
+                </ButtonIcon>
+              </div>
             </div>
-          </div>
-        </header>
+
+            {/* download, print */}
+            <div className="ml-auto flex flex-row items-center">
+              {/* more options */}
+              <div ref={moreOptionRef} className="relative ml-1.5">
+                {/* more options button */}
+                <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
+                  <BsThreeDotsVertical className="" />
+                </ButtonIcon>
+
+                {/* more options pop up */}
+                <Transition
+                  in={moreOptions}
+                  timeout={moreOptionsTransitionDuration}
+                >
+                  {(state) => (
+                    <div
+                      className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
+                      style={{
+                        ...moreOptionsDefaultStyle,
+                        ...moreOptionsTransitionStyles[state],
+                        boxShadow:
+                          "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                      }}
+                    >
+                      <ButtonOption
+                        isActive={options.twoPage}
+                        text="Chế độ xem hai trang"
+                        onClick={toggleTwoPageMode}
+                      />
+                      <div className="w-full my-1.5 h-px bg-neutral-700" />
+                      <ButtonOption
+                        text="Thuyết trình"
+                        isActive={options.fullScreen}
+                        onClick={toggleFullscreen}
+                      />
+                    </div>
+                  )}
+                </Transition>
+              </div>
+            </div>
+          </header>
+        )}
 
         {moreOptions && !isMobileDevice && (
-          <div className="hidden lg:block fixed w-screen overflow-hidden h-screen z-10 bg-transparent" />
+          <div className="fixed w-screen overflow-hidden h-screen z-10 bg-transparent" />
         )}
 
         {/* 2 swiper */}
-        <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row lg:p-0">
+        <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row">
           {/* small swiper */}
           {!isMobileDevice && (
             <div
@@ -631,16 +635,16 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
         {/* active slide mobile */}
         {isMobileDevice && (
-          <div className="block lg:hidden fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+          <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
             {activeSlide} / {slideDataImages.length}
           </div>
         )}
 
         {/* full screen mobile btn */}
-        {isMobileDevice && (
+        {isMobileDevice && !isMobileLandscape && (
           <button
             type="button"
-            className="flex lg:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 fixed top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+            className="flex size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 fixed top-3.5 right-3.5 z-40 font-bold justify-center items-center"
             onClick={() => {
               setIsLandscape(!isLandscape);
             }}

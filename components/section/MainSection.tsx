@@ -267,7 +267,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      htmlElement.style.width = "90vh";
+      htmlElement.style.width = "91.5vh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
@@ -631,7 +631,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
             {/* active slide mobile */}
             {isMobileDevice && (
-              <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+              <div className="fixed px-4 py-1.5 top-3.5 left-5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
                 {activeSlide} / {slideDataImages.length}
               </div>
             )

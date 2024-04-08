@@ -123,9 +123,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           toggleFullscreen();
         }
       };
-      // const screenErrorDisableFullscreen = () => {
-      //   toggleFullscreen();
-      // };
+      const screenErrorDisableFullscreen = () => {
+        toggleFullscreen();
+      };
       const keyDownDisableFullscreen = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           if (!document.fullscreenElement) {
@@ -137,17 +137,17 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         "fullscreenchange",
         screenChangeDisableFullscreen,
       );
-      // window.addEventListener("fullscreenerror", screenErrorDisableFullscreen);
+      window.addEventListener("fullscreenerror", screenErrorDisableFullscreen);
       window.addEventListener("keydown", keyDownDisableFullscreen);
       return () => {
         window.removeEventListener(
           "fullscreenchange",
           screenChangeDisableFullscreen,
         );
-        // window.removeEventListener(
-        //   "fullscreenerror",
-        //   screenErrorDisableFullscreen,
-        // );
+        window.removeEventListener(
+          "fullscreenerror",
+          screenErrorDisableFullscreen,
+        );
         window.removeEventListener("keydown", keyDownDisableFullscreen);
       };
     }
@@ -269,23 +269,23 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     };
     if (isLandscape && !isMobileLandscape) {
       mainRef.current?.scrollIntoView();
-      // window.addEventListener("wheel", preventDefaultScroll, {
-      //   passive: false,
-      // });
-      // window.addEventListener("mousewheel", preventDefaultScroll, {
-      //   passive: false,
-      // });
-      // window.addEventListener("DOMMouseScroll", preventDefaultScroll, {
-      //   passive: false,
-      // });
+      window.addEventListener("wheel", preventDefaultScroll, {
+        passive: false,
+      });
+      window.addEventListener("mousewheel", preventDefaultScroll, {
+        passive: false,
+      });
+      window.addEventListener("DOMMouseScroll", preventDefaultScroll, {
+        passive: false,
+      });
       window.addEventListener("touchmove", preventDefaultScroll, {
         passive: false,
       });
       swiperRef.current?.update();
     } else {
-      // window.removeEventListener("wheel", preventDefaultScroll);
-      // window.removeEventListener("mousewheel", preventDefaultScroll);
-      // window.removeEventListener("DOMMouseScroll", preventDefaultScroll);
+      window.removeEventListener("wheel", preventDefaultScroll);
+      window.removeEventListener("mousewheel", preventDefaultScroll);
+      window.removeEventListener("DOMMouseScroll", preventDefaultScroll);
       window.removeEventListener("touchmove", preventDefaultScroll);
       swiperRef.current?.update();
     }
@@ -569,7 +569,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
                 document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
               }
-              setIsMobileLandscape(screen.orientation.type.includes("landscape"))
+              setIsMobileLandscape(screen.availHeight < screen.availWidth)
             }}
             className={clsx("big-swiper", {
               "full-width": !showSmallSwiper,

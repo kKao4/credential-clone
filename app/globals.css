@@ -4,15 +4,8 @@
 
 html {
   font-size: 4.267vw;
-  @media screen and (orientation: portrait) {
-    @media (min-width: 768px) {
-      font-size: 1vw;
-    }
-  }
-  @media screen and (orientation: landscape) {
-    @media (min-width: 768px) {
-      font-size: 2vw;
-    }
+  @media (min-width: 768px) {
+    font-size: 1vw;
   }
 }
 

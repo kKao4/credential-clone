@@ -326,7 +326,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       >
         {/* header */}
         <header
-          className="hidden lg:flex relative h-[7.5dvh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
+          className="hidden lg:flex relative h-[7.5vh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
           style={{
             boxShadow:
               "rgba(0, 0, 0, 0.12) 0px 3px 4px,rgba(0, 0, 0, 0.2) 0px 2px 4px",
@@ -450,11 +450,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         </header>
 
         {moreOptions && (
-          <div className="hidden lg:block fixed w-screen overflow-hidden h-dvh z-10 bg-transparent" />
+          <div className="hidden lg:block fixed w-screen overflow-hidden h-screen z-10 bg-transparent" />
         )}
 
         {/* 2 swiper */}
-        <div className={clsx("h-full lg:h-[92.5dvh] w-full lg:flex flex-row lg:p-0", { "p-1.5": !isLandscape })}>
+        <div className={clsx("h-full lg:h-[92.5vh] w-full lg:flex flex-row lg:p-0", { "p-1.5": !isLandscape })}>
           {/* small swiper */}
           <div
             className={clsx("hidden lg:block h-full transition-300", {

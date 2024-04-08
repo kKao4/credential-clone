@@ -305,7 +305,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         // not full screen mode mobile
         if (!isLandscape) {
           images.forEach((img, i) => {
-            if (i === 0) console.log(i + ": " + img.getBoundingClientRect().top)
             distanceArrayPortrait.push(img.getBoundingClientRect().top)
           })
           for (let i = 0; i < distanceArrayPortrait.length; i++) {
@@ -318,7 +317,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         // full screen mode mobile
         else {
           images.forEach((img, i) => {
-            if (i === 0) console.log(i + ": " + img.getBoundingClientRect().left)
             distanceArrayLandscape.push(img.getBoundingClientRect().left)
           })
           for (let i = 0; i < distanceArrayLandscape.length; i++) {

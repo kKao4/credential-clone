@@ -267,7 +267,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      htmlElement.style.width = screen.availHeight + "px";
+      htmlElement.style.width = "98vh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
@@ -609,7 +609,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             "h-screen": !isLandscape,
             // "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
           })}
-            style={isLandscape && !isMobileLandscape ? { width: screen.availHeight + "px", height: "100vw" } : undefined}
+            style={isLandscape && !isMobileLandscape ? { width: "98vh", height: "100vw" } : undefined}
           >
             {slideDataImages.map((item, i) => {
               return (

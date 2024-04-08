@@ -611,7 +611,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           })}>
             {slideDataImages.map((item, i) => {
               return (
-                <div key={item.id} className="">
+                <div key={item.id} className="flex justify-center items-center mx-auto">
                   <Image
                     src={item.src}
                     alt={item.alt}

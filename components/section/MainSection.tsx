@@ -269,7 +269,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
       if ((!!(window as any).ApplePaySetupFeature || !!(window as any).safari) && agentHas("Safari") && !agentHas("Chrome") && !agentHas("CriOS")) {
-        htmlElement.style.width = "88vh";
+        htmlElement.style.width = "89vh";
       } else {
         htmlElement.style.width = "92.5vh";
       }

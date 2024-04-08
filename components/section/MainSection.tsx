@@ -265,14 +265,14 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   useEffect(() => {
     const htmlElement = document.documentElement;
     if (isLandscape && !isMobileLandscape) {
-      htmlElement.style.transform = "rotate(-90deg)";
-      htmlElement.style.transformOrigin = "left top";
+      htmlElement.style.transform = "rotate(90deg)";
+      htmlElement.style.transformOrigin = "right top";
       htmlElement.style.width = "100vh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
       htmlElement.style.top = "100%"
-      htmlElement.style.left = "0"
+      htmlElement.style.right = "0"
     } else {
       htmlElement.style.transform = "none";
       htmlElement.style.width = "100vw";

@@ -607,7 +607,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {isMobileDevice && (
           <div key={isLandscape ? 2 : 1} className={clsx("image-container relative grid grid-cols-1 text-white gap-1.5 overflow-auto", {
             "h-screen": !isLandscape,
-            "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
+            "w-[100dvh] h-[100vw]": isLandscape && !isMobileLandscape
           })}>
             {slideDataImages.map((item, i) => {
               return (

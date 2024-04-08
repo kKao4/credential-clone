@@ -35,7 +35,6 @@ import { MdRotate90DegreesCcw, MdFullscreen } from "react-icons/md";
 import { TbArrowAutofitWidth } from "react-icons/tb";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
-  useIsClient,
   useOnClickOutside,
   useWindowSize,
 } from "usehooks-ts";
@@ -93,8 +92,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [options, setOptions] = useState({ twoPage: false, fullScreen: false });
   const { width } = useWindowSize();
   const [isLandscape, setIsLandscape] = useState(false);
-  const isClient = useIsClient()
-  const [bigSwiperSlide, setBigSwiperSide] = useState<{ slidesPerView: "auto" | number, slidesPerGroup: number }>({ slidesPerView: "auto", slidesPerGroup: 1 })
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
   const [key, setKey] = useState(0)
 
@@ -119,15 +116,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       swiperRef.current.zoom.in(zoomScale);
     }
   }, [zoomScale]);
-
-  // set big swiper slide height dynamic
-  useEffect(() => {
-    const img = document.querySelector<HTMLElement>(".swiper-slide-image")
-    if (isClient && img && isMobileDevice) {
-      const x = Math.round(window.innerHeight / img.offsetHeight)
-      setBigSwiperSide({ slidesPerView: x, slidesPerGroup: x })
-    }
-  }, [isClient, isMobileDevice])
 
   // disable full screen
   useEffect(() => {
@@ -504,9 +492,12 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
                   className={clsx("small-swiper")}
                   onAfterInit={() => {
-                    document
-                      .querySelectorAll(".swiper-wrapper")[0]
-                      ?.classList.remove("initial-small-swiper");
+                    if (document
+                      .querySelectorAll(".swiper-wrapper")[0].classList.contains("initial-small-swiper")) {
+                      document
+                        .querySelectorAll(".swiper-wrapper")[0]
+                        ?.classList.remove("initial-small-swiper");
+                    }
                   }}
                 >
                   {slideDataImages.map((item, i) => {
@@ -537,7 +528,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             mousewheel={{ enabled: !isMobileDevice }}
             spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
             slidesPerView={isMobileDevice ? "auto" : options.twoPage ? 2 : 1}
-            slidesPerGroup={isMobileDevice ? (isLandscape ? 1 : bigSwiperSlide.slidesPerGroup) : options.twoPage ? 2 : 1}
+            slidesPerGroup={isMobileDevice ? 1 : options.twoPage ? 2 : 1}
             scrollbar={{
               enabled: !isMobileDevice,
               draggable: true,
@@ -582,7 +573,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             }}
             wrapperClass="swiper-wrapper initial-big-swiper"
             onAfterInit={() => {
-              document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+              if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
+                document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+              }
               setIsMobileLandscape(screen.orientation.type.includes("landscape"))
             }}
             className={clsx("big-swiper", {

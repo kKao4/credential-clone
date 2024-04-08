@@ -37,6 +37,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   useOnClickOutside,
   useWindowSize,
+  useIsClient
 } from "usehooks-ts";
 import ButtonOption from "@/components/button/ButtonOption";
 import { slideDataImages } from "@/app/data";
@@ -93,6 +94,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const { width } = useWindowSize();
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
+  const isClient = useIsClient()
   const [key, setKey] = useState(0)
 
   // close more options
@@ -300,6 +302,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     return () => window.removeEventListener("orientationchange", detectOrientation)
   }, [])
 
+  // remount slide when rotate web
   useEffect(() => {
     setKey(prevState => prevState + 1)
   }, [isLandscape, isMobileLandscape])
@@ -310,7 +313,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         ref={mainRef}
         className={clsx("relative bg-gray-main", {
           "h-screen": !isLandscape,
-          "w-[100dvh] h-[100vw]": isLandscape && !isMobileLandscape,
+          "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape,
         })}
         style={
           isLandscape && !isMobileLandscape

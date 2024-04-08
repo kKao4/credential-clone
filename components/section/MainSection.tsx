@@ -298,8 +298,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     const detectOrientation = () => {
       setIsMobileLandscape(screen.availHeight < screen.availWidth)
     }
-    window.addEventListener("orientationchange", detectOrientation)
-    return () => window.removeEventListener("orientationchange", detectOrientation)
+    window.addEventListener("resize", detectOrientation)
+    return () => window.removeEventListener("resize", detectOrientation)
   }, [])
 
   // remount slide when rotate web

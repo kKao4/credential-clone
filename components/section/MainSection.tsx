@@ -605,9 +605,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         )}
 
         {isMobileDevice && (
-          <div key={isLandscape ? 2 : 1} className={clsx("image-container grid grid-cols-1 text-white gap-1.5 overflow-auto", {
+          <div key={isLandscape ? 2 : 1} className={clsx("image-container relative grid grid-cols-1 text-white gap-1.5 overflow-auto", {
             "h-screen": !isLandscape,
-            "w-[100dvh] h-[100vw]": isLandscape && !isMobileLandscape
+            "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
           })}>
             {slideDataImages.map((item, i) => {
               return (
@@ -626,27 +626,26 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 </div>
               )
             })}
+            {/* full screen mobile btn */}
+            {isMobileDevice && !isMobileLandscape && (
+              <button
+                type="button"
+                className="flex size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+                onClick={() => {
+                  setIsLandscape(!isLandscape);
+                }}
+              >
+                <MdFullscreen className="text-[1.5rem] text-black/80" />
+              </button>
+            )}
           </div>
         )}
 
         {/* active slide mobile */}
         {isMobileDevice && (
-          <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+          <div className="absolute px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
             {activeSlide} / {slideDataImages.length}
           </div>
-        )}
-
-        {/* full screen mobile btn */}
-        {isMobileDevice && !isMobileLandscape && (
-          <button
-            type="button"
-            className="flex size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 fixed top-3.5 right-3.5 z-40 font-bold justify-center items-center"
-            onClick={() => {
-              setIsLandscape(!isLandscape);
-            }}
-          >
-            <MdFullscreen className="text-[1.5rem] text-black/80" />
-          </button>
         )}
       </main>
     </>

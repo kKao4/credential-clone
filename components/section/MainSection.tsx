@@ -267,7 +267,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      htmlElement.style.width = "100vh";
+      htmlElement.style.width = "100dvh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
@@ -335,7 +335,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   return (
     <>
-      <main className="relative bg-gray-main h-screen">
+      <main className="relative bg-gray-main">
         {/* header */}
         {!isMobileDevice && (
           <header

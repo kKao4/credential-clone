@@ -343,7 +343,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   return (
     <>
-      <main className="relative bg-gray-main">
+      <main className="relative bg-gray-main w-full">
         {/* header */}
         {!isMobileDevice && (
           <header
@@ -472,13 +472,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         )}
 
         {moreOptions && !isMobileDevice && (
-          <div className="fixed w-screen overflow-hidden h-screen z-10 bg-transparent" />
+          <div className="fixed w-full overflow-hidden h-screen z-10 bg-transparent" />
         )}
 
         {/* 2 swiper */}
-        <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row">
-          {/* small swiper */}
-          {!isMobileDevice && (
+        {!isMobileDevice && (
+          <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row">
+            {/* small swiper */}
             <div
               className={clsx("h-full transition-300", {
                 "w-[19%]": showSmallSwiper,
@@ -537,10 +537,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 )}
               </Transition>
             </div>
-          )}
-
-          {/* big swiper */}
-          {!isMobileDevice && (
+            {/* big swiper */}
             <Swiper
               speed={400}
               direction="vertical"
@@ -612,11 +609,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 );
               })}
             </Swiper>
-          )}
-        </div>
+          </div>
+        )}
 
         {isMobileDevice && (
-          <div key={isLandscape ? 2 : 1} className={clsx("image-container grid grid-cols-1 p-1.5 text-white gap-1.5 overflow-auto", {
+          <div key={isLandscape ? 2 : 1} className={clsx("image-container grid grid-cols-1 text-white gap-1.5 overflow-auto", {
             "h-screen": !isLandscape,
             "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
           })}>

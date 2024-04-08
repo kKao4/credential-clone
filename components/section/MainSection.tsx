@@ -267,7 +267,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      htmlElement.style.width = "98vh";
+      htmlElement.style.width = "95vh";
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"
       htmlElement.style.position = "absolute"
@@ -609,7 +609,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             "h-screen": !isLandscape,
             // "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
           })}
-            style={isLandscape && !isMobileLandscape ? { width: "98vh", height: "100vw" } : undefined}
+            style={isLandscape && !isMobileLandscape ? { width: "95vh", height: "100vw" } : undefined}
           >
             {slideDataImages.map((item, i) => {
               return (
@@ -628,6 +628,16 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 </div>
               )
             })}
+
+            {/* active slide mobile */}
+            {
+              isMobileDevice && (
+                <div className="fixed px-4 py-1.5 top-3.5 left-6 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+                  {activeSlide} / {slideDataImages.length}
+                </div>
+              )
+            }
+            
             {/* full screen mobile btn */}
             {isMobileDevice && !isMobileLandscape && (
               <button
@@ -643,12 +653,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </div>
         )}
 
-        {/* active slide mobile */}
-        {isMobileDevice && (
-          <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
-            {activeSlide} / {slideDataImages.length}
-          </div>
-        )}
       </main>
     </>
   );

@@ -271,7 +271,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       if ((!!(window as any).ApplePaySetupFeature || !!(window as any).safari) && agentHas("Safari") && !agentHas("Chrome") && !agentHas("CriOS")) {
         htmlElement.style.width = "89vh";
       } else {
-        htmlElement.style.width = "92vh";
+        htmlElement.style.width = "91.5vh";
       }
       htmlElement.style.height = "100vw";
       htmlElement.style.overflow = "hidden"

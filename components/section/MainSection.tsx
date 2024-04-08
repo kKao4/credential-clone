@@ -330,7 +330,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       imagesContainer.addEventListener("scroll", fnc)
       return () => imagesContainer.removeEventListener("scroll", fnc)
     }
-  }, [isClient, isLandscape])
+  }, [isClient, isLandscape, isMobileLandscape])
 
   return (
     <>
@@ -631,7 +631,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
         {/* active slide mobile */}
         {isMobileDevice && (
-          <div className="block lg:hidden absolute px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+          <div className="block lg:hidden fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
             {activeSlide} / {slideDataImages.length}
           </div>
         )}
@@ -640,7 +640,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {isMobileDevice && (
           <button
             type="button"
-            className="flex lg:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 absolute top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+            className="flex lg:hidden size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 fixed top-3.5 right-3.5 z-40 font-bold justify-center items-center"
             onClick={() => {
               setIsLandscape(!isLandscape);
             }}

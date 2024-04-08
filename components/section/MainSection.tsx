@@ -18,7 +18,6 @@ import {
   Zoom,
   Grid,
   Keyboard,
-  EffectCreative,
 } from "swiper/modules";
 
 import { FaBars } from "react-icons/fa";
@@ -27,7 +26,7 @@ import clsx from "clsx";
 import { Swiper as SwiperType } from "swiper/types";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
-import { FaMinus, FaPlus, FaChevronLeft, FaChevronRight, FaChevronDown, FaChevronUp } from "react-icons/fa6";
+import { FaMinus, FaPlus } from "react-icons/fa6";
 import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
@@ -80,7 +79,6 @@ interface MainSectionProps {
 }
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
-  const mainRef = useRef<HTMLDivElement>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const moreOptionRef = useRef<HTMLDivElement>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -94,8 +92,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const { width } = useWindowSize();
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
+  console.log("🚀 ~ MainSection ~ isMobileLandscape:", isMobileLandscape)
   const isClient = useIsClient()
-  const [key, setKey] = useState(0)
 
   // close more options
   const closeMoreOptions = () => {
@@ -266,30 +264,22 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   // config for full screen mode mobile
   useEffect(() => {
-    const preventDefaultScroll = (e: any) => {
-      e.preventDefault();
-    };
+    const htmlElement = document.documentElement;
     if (isLandscape && !isMobileLandscape) {
-      mainRef.current?.scrollIntoView(true);
-      window.addEventListener("wheel", preventDefaultScroll, {
-        passive: false,
-      });
-      window.addEventListener("mousewheel", preventDefaultScroll, {
-        passive: false,
-      });
-      window.addEventListener("DOMMouseScroll", preventDefaultScroll, {
-        passive: false,
-      });
-      window.addEventListener("touchmove", preventDefaultScroll, {
-        passive: false,
-      });
-      swiperRef.current?.update();
+      htmlElement.style.transform = "rotate(-90deg)";
+      htmlElement.style.transformOrigin = "left top";
+      htmlElement.style.width = "100vh";
+      htmlElement.style.height = "100vw";
+      htmlElement.style.overflow = "hidden"
+      htmlElement.style.position = "absolute"
+      htmlElement.style.top = "100%"
+      htmlElement.style.left = "0"
     } else {
-      window.removeEventListener("wheel", preventDefaultScroll);
-      window.removeEventListener("mousewheel", preventDefaultScroll);
-      window.removeEventListener("DOMMouseScroll", preventDefaultScroll);
-      window.removeEventListener("touchmove", preventDefaultScroll);
-      swiperRef.current?.update();
+      htmlElement.style.transform = "none";
+      htmlElement.style.width = "100vw";
+      htmlElement.style.height = "100vh";
+      htmlElement.style.overflow = "auto"
+      htmlElement.style.position = "static"
     }
   }, [isLandscape, isMobileLandscape]);
 
@@ -302,27 +292,49 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     return () => window.removeEventListener("resize", detectOrientation)
   }, [])
 
-  // remount slide when rotate web
+  // calculate active img
   useEffect(() => {
-    setKey(prevState => prevState + 1)
-  }, [isLandscape, isMobileLandscape])
+    const imagesContainer = document.querySelector<HTMLElement>(".image-container")
+    if (imagesContainer && isClient) {
+      const fnc = () => {
+        const images = document.querySelectorAll<HTMLElement>(".image")
+        let distanceArrayPortrait: number[] = []
+        let distanceArrayLandscape: number[] = []
+        // not full screen mode mobile
+        if (!isLandscape) {
+          images.forEach((img, i) => {
+            if (i === 0) console.log(i + ": " + img.getBoundingClientRect().top)
+            distanceArrayPortrait.push(img.getBoundingClientRect().top)
+          })
+          for (let i = 0; i < distanceArrayPortrait.length; i++) {
+            if (Math.abs(distanceArrayPortrait[i]) <= images[i].offsetHeight / 2) {
+              setActiveSlide(i + 1)
+              break
+            }
+          }
+        }
+        // full screen mode mobile
+        else {
+          images.forEach((img, i) => {
+            if (i === 0) console.log(i + ": " + img.getBoundingClientRect().left)
+            distanceArrayLandscape.push(img.getBoundingClientRect().left)
+          })
+          for (let i = 0; i < distanceArrayLandscape.length; i++) {
+            if (Math.abs(distanceArrayLandscape[i]) <= images[i].offsetHeight / 2) {
+              setActiveSlide(i + 1)
+              break
+            }
+          }
+        }
+      }
+      imagesContainer.addEventListener("scroll", fnc)
+      return () => imagesContainer.removeEventListener("scroll", fnc)
+    }
+  }, [isClient, isLandscape])
 
   return (
     <>
-      <main
-        ref={mainRef}
-        className={clsx("relative bg-gray-main", {
-          "h-screen": !isLandscape,
-          "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape,
-        })}
-        style={
-          isLandscape && !isMobileLandscape
-            ? {
-              transform: "rotate(90deg) translateX(100%)",
-            }
-            : undefined
-        }
-      >
+      <main className="relative bg-gray-main">
         {/* header */}
         <header
           className="hidden lg:flex relative h-[7.5vh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
@@ -448,187 +460,174 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </div>
         </header>
 
-        {moreOptions && (
+        {moreOptions && !isMobileDevice && (
           <div className="hidden lg:block fixed w-screen overflow-hidden h-screen z-10 bg-transparent" />
         )}
 
         {/* 2 swiper */}
-        <div className={clsx("h-full lg:h-[92.5vh] w-full lg:flex flex-row lg:p-0", { "p-1.5": !isLandscape })}>
+        <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row lg:p-0">
           {/* small swiper */}
-          <div
-            className={clsx("hidden lg:block h-full transition-300", {
-              "w-[19%]": showSmallSwiper,
-              "w-0": !showSmallSwiper,
-            })}
-          >
-            <Transition
-              in={showSmallSwiper}
-              timeout={smallSwiperTransitionDuration}
+          {!isMobileDevice && (
+            <div
+              className={clsx("h-full transition-300", {
+                "w-[19%]": showSmallSwiper,
+                "w-0": !showSmallSwiper,
+              })}
             >
-              {(state) => (
-                <Swiper
-                  style={{
-                    ...smallSwiperDefaultStyle,
-                    ...smallSwiperTransitionStyles[state],
-                  }}
-                  onSwiper={setThumbsSwiper as any}
-                  slidesPerView="auto"
-                  speed={400}
-                  slidesPerGroup={5}
-                  spaceBetween={(width / 100) * 2}
-                  mousewheel={{ sensitivity: 2 }}
-                  direction="vertical"
-                  freeMode
-                  wrapperClass="swiper-wrapper initial-small-swiper"
-                  scrollbar={{
-                    enabled: true,
-                    draggable: true,
-                  }}
-                  modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
-                  className={clsx("small-swiper")}
-                  onAfterInit={() => {
-                    if (document
-                      .querySelectorAll(".swiper-wrapper")[0].classList.contains("initial-small-swiper")) {
-                      document
-                        .querySelectorAll(".swiper-wrapper")[0]
-                        ?.classList.remove("initial-small-swiper");
-                    }
-                  }}
-                >
-                  {slideDataImages.map((item, i) => {
-                    return (
-                      <SwiperSlide key={item.id}>
-                        <Image
-                          src={item.src}
-                          alt={item.alt}
-                          width={1920}
-                          height={1080}
-                          priority={i < 5}
-                        />
-                        <p className="swiper-slide-text">{i + 1}</p>
-                      </SwiperSlide>
-                    );
-                  })}
-                </Swiper>
-              )}
-            </Transition>
-          </div>
+              <Transition
+                in={showSmallSwiper}
+                timeout={smallSwiperTransitionDuration}
+              >
+                {(state) => (
+                  <Swiper
+                    style={{
+                      ...smallSwiperDefaultStyle,
+                      ...smallSwiperTransitionStyles[state],
+                    }}
+                    onSwiper={setThumbsSwiper as any}
+                    slidesPerView="auto"
+                    speed={400}
+                    slidesPerGroup={5}
+                    spaceBetween={(width / 100) * 2}
+                    mousewheel={{ sensitivity: 2 }}
+                    direction="vertical"
+                    freeMode
+                    wrapperClass="swiper-wrapper initial-small-swiper"
+                    scrollbar={{
+                      enabled: true,
+                      draggable: true,
+                    }}
+                    modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
+                    className={clsx("small-swiper")}
+                    onAfterInit={() => {
+                      if (document
+                        .querySelectorAll(".swiper-wrapper")[0].classList.contains("initial-small-swiper")) {
+                        document
+                          .querySelectorAll(".swiper-wrapper")[0]
+                          ?.classList.remove("initial-small-swiper");
+                      }
+                    }}
+                  >
+                    {slideDataImages.map((item, i) => {
+                      return (
+                        <SwiperSlide key={item.id}>
+                          <Image
+                            src={item.src}
+                            alt={item.alt}
+                            width={1920}
+                            height={1080}
+                            priority={i < 5}
+                          />
+                          <p className="swiper-slide-text">{i + 1}</p>
+                        </SwiperSlide>
+                      );
+                    })}
+                  </Swiper>
+                )}
+              </Transition>
+            </div>
+          )}
 
           {/* big swiper */}
-          <Swiper
-            key={key}
-            speed={400}
-            direction={options.twoPage && !isMobileLandscape ? "horizontal" : "vertical"}
-            thumbs={isMobileDevice ? undefined : { swiper: thumbsSwiper }}
-            mousewheel={{ enabled: !isMobileDevice }}
-            spaceBetween={isMobileDevice ? (width / 100) * 1.5 : 0}
-            slidesPerView={isMobileDevice ? "auto" : options.twoPage ? 2 : 1}
-            slidesPerGroup={isMobileDevice ? 1 : options.twoPage ? 2 : 1}
-            scrollbar={{
-              enabled: !isMobileDevice,
-              draggable: true,
-            }}
-            effect={isLandscape && !isMobileLandscape ? "creative" : ""}
-            freeMode={{ enabled: isMobileDevice, sticky: isLandscape }}
-            grid={
-              options.twoPage
-                ? {
-                  fill: "column",
-                }
-                : undefined
-            }
-            zoom={!isMobileDevice}
-            autoHeight={isMobileDevice}
-            keyboard={{ enabled: !isMobileDevice }}
-            modules={[
-              FreeMode,
-              Thumbs,
-              Mousewheel,
-              Scrollbar,
-              Grid,
-              Keyboard,
-              EffectCreative,
-              Zoom,
-            ]}
-            creativeEffect={isMobileLandscape ? undefined : {
-              next: {
-                translate: ["100%", 0, 0],
-              },
-              prev: {
-                translate: ["-100%", 0, 0],
-              },
-              limitProgress: slideDataImages.length
-            }}
-            onBeforeInit={(swiper) => {
-              swiperRef.current = swiper;
-            }}
-            onActiveIndexChange={(swiper) => {
-              setActiveSlide(swiper.activeIndex + 1);
-              setZoomScale(1);
-            }}
-            wrapperClass="swiper-wrapper initial-big-swiper"
-            onAfterInit={() => {
-              if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
-                document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+          {!isMobileDevice && (
+            <Swiper
+              speed={400}
+              direction="vertical"
+              thumbs={{ swiper: thumbsSwiper }}
+              mousewheel={true}
+              slidesPerView={options.twoPage ? 2 : 1}
+              slidesPerGroup={options.twoPage ? 2 : 1}
+              scrollbar={{
+                enabled: !isMobileDevice,
+                draggable: true,
+              }}
+              grid={
+                options.twoPage
+                  ? {
+                    fill: "column",
+                  }
+                  : undefined
               }
-              setIsMobileLandscape(screen.availHeight < screen.availWidth)
-            }}
-            className={clsx("big-swiper", {
-              "full-width": !showSmallSwiper,
-              "fit-width": fitWidth,
-            })}
-            touchReleaseOnEdges
-          >
-            {slideDataImages.map((item, i) => {
-              return (
-                <SwiperSlide key={item.id}>
-                  <div className="swiper-zoom-container">
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={1920}
-                      height={1080}
-                      priority={i < 2}
-                      className={clsx("swiper-slide-image", {
-                        "slide-rotate-0": slideRotate === 0,
-                        "slide-rotate-90": slideRotate === 90,
-                        "slide-rotate-180": slideRotate === 180,
-                        "slide-rotate-270": slideRotate === 270,
-                        "fit-width": fitWidth,
-                        "not-fit-width": !fitWidth,
-                        "img-landscape": isLandscape && !isMobileLandscape,
-                        "img-mobile-landscape": isMobileLandscape
-                      })}
-                    />
-                  </div>
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-          {/* prev/next button full screen mode mobile  */}
-          {isLandscape && isMobileDevice && !isMobileLandscape && (
-            <>
-              <button className="absolute top-1/2 -translate-y-1/2 left-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
-                <FaChevronLeft className="text-white/80 text-[2.5rem]" />
-              </button>
-              <button className="absolute top-1/2 -translate-y-1/2 right-2.5 px-1 py-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
-                <FaChevronRight className="text-white/80 text-[2.5rem]" />
-              </button>
-            </>
-          )}
-
-          {/* prev/next button full screen mode mobile  */}
-          {isLandscape && isMobileDevice && isMobileLandscape && (
-            <>
-              <button className="absolute top-2.5 -translate-x-1/2 left-1/2 py-1 px-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slidePrev()}>
-                <FaChevronUp className="text-white/80 text-[2.5rem]" />
-              </button>
-              <button className="absolute bottom-2.5 -translate-x-1/2 left-1/2 py-1 px-3.5 z-40 flex justify-center items-center rounded-lg bg-black/20" onClick={() => swiperRef.current?.slideNext()}>
-                <FaChevronDown className="text-white/80 text-[2.5rem]" />
-              </button>
-            </>
+              zoom={true}
+              autoHeight={true}
+              keyboard={true}
+              modules={[
+                Thumbs,
+                Mousewheel,
+                Scrollbar,
+                Grid,
+                Keyboard,
+                Zoom,
+              ]}
+              onBeforeInit={(swiper) => {
+                swiperRef.current = swiper;
+              }}
+              onActiveIndexChange={(swiper) => {
+                setActiveSlide(swiper.activeIndex + 1);
+                setZoomScale(1);
+              }}
+              wrapperClass="swiper-wrapper initial-big-swiper"
+              onAfterInit={() => {
+                if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
+                  document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
+                }
+              }}
+              className={clsx("big-swiper", {
+                "full-width": !showSmallSwiper,
+                "fit-width": fitWidth,
+              })}
+            >
+              {slideDataImages.map((item, i) => {
+                return (
+                  <SwiperSlide key={item.id}>
+                    <div className="swiper-zoom-container">
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        width={1920}
+                        height={1080}
+                        priority={i < 2}
+                        className={clsx("swiper-slide-image", {
+                          "slide-rotate-0": slideRotate === 0,
+                          "slide-rotate-90": slideRotate === 90,
+                          "slide-rotate-180": slideRotate === 180,
+                          "slide-rotate-270": slideRotate === 270,
+                          "fit-width": fitWidth,
+                          "not-fit-width": !fitWidth,
+                        })}
+                      />
+                    </div>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
           )}
         </div>
+
+        {isMobileDevice && (
+          <div key={isLandscape ? 2 : 1} className={clsx("image-container grid grid-cols-1 p-1.5 text-white gap-1.5 overflow-auto", {
+            "h-screen": !isLandscape,
+            "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
+          })}>
+            {slideDataImages.map((item, i) => {
+              return (
+                <div key={item.id} className="">
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    className={clsx("image", {
+                      "w-full object-cover": !isLandscape,
+                      "h-[100vw] object-contain": isLandscape && !isMobileLandscape
+                    })}
+                    width={1920}
+                    height={1080}
+                    priority={i < 4}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* active slide mobile */}
         {isMobileDevice && (

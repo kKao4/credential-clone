@@ -273,16 +273,23 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       htmlElement.style.position = "absolute"
       htmlElement.style.top = "100%"
       htmlElement.style.right = "0"
-      document.documentElement.style.fontSize = "2rem"
     } else {
       htmlElement.style.transform = "none";
       htmlElement.style.width = "100vw";
       htmlElement.style.height = "100vh";
       htmlElement.style.overflow = "auto"
       htmlElement.style.position = "static"
-      document.documentElement.style.fontSize = "1rem"
     }
   }, [isLandscape, isMobileLandscape]);
+
+  // change font size when landscape mobile
+  useEffect(() => {
+    if (isMobileLandscape) {
+      document.documentElement.style.fontSize = "2rem"
+    } else {
+      document.documentElement.style.fontSize = "1rem"
+    }
+  }, [isMobileLandscape])
 
   // detect user rotate in mobile device
   useEffect(() => {

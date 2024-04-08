@@ -282,14 +282,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [isLandscape, isMobileLandscape]);
 
-  // change font size when landscape mobile
-  useEffect(() => {
-    if (isMobileLandscape) {
-      document.documentElement.style.fontSize = "2rem"
-    } else {
-      document.documentElement.style.fontSize = "1rem"
-    }
-  }, [isMobileLandscape])
 
   // detect user rotate in mobile device
   useEffect(() => {
@@ -639,7 +631,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
         {/* active slide mobile */}
         {isMobileDevice && (
-          <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
+          <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
             {activeSlide} / {slideDataImages.length}
           </div>
         )}

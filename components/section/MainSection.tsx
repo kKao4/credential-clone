@@ -538,7 +538,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               zoom={true}
               autoHeight={true}
               keyboard={true}
-              freeMode={{enabled: true}}
               modules={[
                 Thumbs,
                 Mousewheel,
@@ -553,7 +552,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               onActiveIndexChange={(swiper) => {
                 setActiveSlide(swiper.activeIndex + 1);
               }}
-              wrapperClass={clsx("swiper-wrapper initial-big-swiper", { "transition-400": !isMobileDevice })}
+              wrapperClass="swiper-wrapper initial-big-swiper"
               onAfterInit={() => {
                 if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
                   document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")

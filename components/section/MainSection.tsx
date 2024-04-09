@@ -7,7 +7,6 @@ import "swiper/css/free-mode";
 import "swiper/css/thumbs";
 import "swiper/css/scrollbar";
 import "swiper/css/effect-creative";
-import "swiper/css/zoom";
 import "swiper/css/grid";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -15,7 +14,6 @@ import {
   Thumbs,
   Mousewheel,
   Scrollbar,
-  Zoom,
   Grid,
   Keyboard,
 } from "swiper/modules";
@@ -46,7 +44,7 @@ type TransitionStyles = {
   [key in TransitionStatus]?: React.CSSProperties;
 };
 
-const smallSwiperTransitionDuration = 300;
+const smallSwiperTransitionDuration = 400;
 const moreOptionsTransitionDuration = 150;
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -102,13 +100,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   // close more options pop up
   useOnClickOutside(moreOptionRef, closeMoreOptions);
-
-  // update zoom slide
-  useEffect(() => {
-    if (swiperRef.current) {
-      swiperRef.current.zoom.in(zoomScale);
-    }
-  }, [zoomScale]);
 
   // disable full screen
   useEffect(() => {
@@ -167,13 +158,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [options.fullScreen]);
 
-  // reset slide to rotate 0 when zoom
-  useEffect(() => {
-    if (zoomScale) {
-      setSlideRotate(0);
-    }
-  }, [zoomScale]);
-
   // show/hide small swiper
   const toggleSmallSwiper = () => setShowSmallSwiper(!showSmallSwiper);
 
@@ -182,7 +166,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   // change rotate slide
   const handleRotateSlide = () => {
-    setZoomScale(1);
     if (slideRotate === 270) {
       setSlideRotate(0);
     } else {
@@ -477,7 +460,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row">
             {/* small swiper */}
             <div
-              className={clsx("h-full transition-300", {
+              className={clsx("h-full transition-400", {
                 "w-[19%]": showSmallSwiper,
                 "w-0": !showSmallSwiper,
               })}
@@ -495,7 +478,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     onSwiper={setThumbsSwiper as any}
                     slidesPerView="auto"
                     speed={400}
-                    slidesPerGroup={5}
                     spaceBetween={(width / 100) * 2}
                     mousewheel={{ sensitivity: 2 }}
                     direction="vertical"
@@ -539,7 +521,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               speed={400}
               direction="vertical"
               thumbs={{ swiper: thumbsSwiper }}
-              mousewheel={true}
+              mousewheel={{ enabled: true, sensitivity: 4 }}
               slidesPerView={options.twoPage ? 2 : 1}
               slidesPerGroup={options.twoPage ? 2 : 1}
               scrollbar={{
@@ -556,22 +538,22 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               zoom={true}
               autoHeight={true}
               keyboard={true}
+              freeMode={{enabled: true}}
               modules={[
                 Thumbs,
                 Mousewheel,
                 Scrollbar,
                 Grid,
                 Keyboard,
-                Zoom,
+                FreeMode
               ]}
               onBeforeInit={(swiper) => {
                 swiperRef.current = swiper;
               }}
               onActiveIndexChange={(swiper) => {
                 setActiveSlide(swiper.activeIndex + 1);
-                setZoomScale(1);
               }}
-              wrapperClass="swiper-wrapper initial-big-swiper"
+              wrapperClass={clsx("swiper-wrapper initial-big-swiper", { "transition-400": !isMobileDevice })}
               onAfterInit={() => {
                 if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
                   document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
@@ -585,23 +567,18 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               {slideDataImages.map((item, i) => {
                 return (
                   <SwiperSlide key={item.id}>
-                    <div className="swiper-zoom-container">
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        width={1920}
-                        height={1080}
-                        priority={i < 2}
-                        className={clsx("swiper-slide-image", {
-                          "slide-rotate-0": slideRotate === 0,
-                          "slide-rotate-90": slideRotate === 90,
-                          "slide-rotate-180": slideRotate === 180,
-                          "slide-rotate-270": slideRotate === 270,
-                          "fit-width": fitWidth,
-                          "not-fit-width": !fitWidth,
-                        })}
-                      />
-                    </div>
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      width={1920}
+                      height={1080}
+                      priority={i < 2}
+                      style={{ transform: `scale(${zoomScale}) rotate(${slideRotate}deg)` }}
+                      className={clsx("swiper-slide-image", {
+                        "fit-width": fitWidth,
+                        "not-fit-width": !fitWidth,
+                      })}
+                    />
                   </SwiperSlide>
                 );
               })}
@@ -612,7 +589,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {isMobileDevice && (
           <div key={isLandscape ? 2 : 1} className={clsx("image-container relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
             "h-screen": !isLandscape,
-            // "w-[100vh] h-[100vw]": isLandscape && !isMobileLandscape
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
           >

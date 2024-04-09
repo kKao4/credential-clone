@@ -20,9 +20,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .transition-200 {
   @apply transition-all duration-200 ease-out !important;
 }
-.transition-300 {
-  @apply transition-all duration-300 ease-out !important;
-}
 .transition-400 {
   @apply transition-all duration-400 ease-out !important;
 }
@@ -48,7 +45,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .small-swiper .swiper-slide img {
-  @apply opacity-50 transition-all duration-300 ease-out !important;
+  @apply opacity-50 transition-all duration-400 ease-out !important;
 }
 
 .small-swiper .swiper-slide:hover img {
@@ -70,7 +67,7 @@ input[type="number"]::-webkit-outer-spin-button {
   @apply bg-transparent !important;
 }
 
-.small-swiper .swiper-scrollbar-drag {
+.small-swiper .swiper-scrollbar-drag, .big-swiper .swiper-scrollbar-drag {
   @apply transition-all ease-out !important;
 }
 
@@ -98,7 +95,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .big-swiper {
-  @apply w-full h-full lg:w-[81%] bg-gray-main transition-300 !important;
+  @apply w-full h-full lg:w-[81%] bg-gray-main transition-400 !important;
 }
 
 .big-swiper.full-width {
@@ -109,8 +106,12 @@ input[type="number"]::-webkit-outer-spin-button {
   z-index: 10;
 }
 
+.big-swiper .swiper-slide {
+  overflow: hidden !important;
+}
+
 .big-swiper .swiper-slide img {
-  @apply block w-full transition-300;
+  @apply block h-full transition-400;
 }
 
 .big-swiper .swiper-slide img.fit-width {
@@ -119,17 +120,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .big-swiper .swiper-slide img.not-fit-width {
   @apply object-contain;
-}
-
-.big-swiper .swiper-slide img.slide-rotate-90 {
-  @apply rotate-90 !important;
-}
-
-.big-swiper .swiper-slide img.slide-rotate-180 {
-  @apply rotate-180 !important;
-}
-.big-swiper .swiper-slide img.slide-rotate-270 {
-  @apply rotate-[270deg] !important;
 }
 
 .initial-small-swiper {

@@ -521,7 +521,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               speed={400}
               direction="vertical"
               thumbs={{ swiper: thumbsSwiper }}
-              mousewheel={{ enabled: true, sensitivity: 4 }}
+              mousewheel={{ enabled: true, sensitivity: 3 }}
               slidesPerView={options.twoPage ? 2 : 1}
               slidesPerGroup={options.twoPage ? 2 : 1}
               scrollbar={{

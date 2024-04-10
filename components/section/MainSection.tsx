@@ -7,9 +7,9 @@ import "swiper/css/thumbs";
 import "swiper/css/scrollbar";
 import "swiper/css/effect-creative";
 import "swiper/css/grid";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
-import { Transition, TransitionStatus } from "react-transition-group";
+import { Transition } from "react-transition-group";
 import clsx from "clsx";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
@@ -17,13 +17,14 @@ import { FaMinus, FaPlus } from "react-icons/fa6";
 import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
-import { MdRotate90DegreesCcw, MdFullscreen } from "react-icons/md";
+import { MdRotate90DegreesCcw, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { TbArrowAutofitWidth, TbArrowAutofitHeight } from "react-icons/tb";
 import { useIsClient } from "usehooks-ts";
 import { slideDataImages } from "@/app/data";
 import { agentHas } from "@/utils/agentHas";
 import gsap from "gsap"
 import ScrollToPlugin from "gsap/ScrollToPlugin";
+import { clickedSmallImagesReducer } from "@/reducer/clickedSmallImagesReducer";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -37,6 +38,9 @@ interface MainSectionProps {
 gsap.registerPlugin(ScrollToPlugin)
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
+  const [clickedSmallImages, dispatchClickedSmallImages] = useReducer(clickedSmallImagesReducer, slideDataImages.map((_, i) => {
+    return { index: i, clicked: false }
+  }))
   const headerRef = useRef<HTMLHeadElement>(null)
   const smallImageModalRef = useRef<HTMLDivElement>(null)
   const [showSmallImage, setShowSmallImage] = useState(true);
@@ -160,17 +164,24 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) < images[i].offsetHeight / 2) {
               setActiveImage(i + 1)
               setDraftActiveImage(i + 1)
+              const isClickedSmallImages = clickedSmallImages.some(item => {
+                return item.clicked
+              })
               const rect = imagesThumb[i].getBoundingClientRect()
               if (!(rect.top >= headerRef.current!.offsetHeight && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 rect.right <= (window.innerWidth || document.documentElement.clientWidth))) {
                 // imagesThumbContainer.scrollTo({ top: imagesThumb[i].offsetTop - parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")), behavior: "smooth" })
-                gsap.to(imagesThumbContainer, {
-                  duration: 0.5, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")) }
-                })
+                if (!isClickedSmallImages) {
+                  gsap.to(imagesThumbContainer, {
+                    duration: 0.5, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")) }
+                  })
+                }
               }
-              scrollTimeout = setTimeout(() => {
-                gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i] } })
-              }, 500)
+              if (!isClickedSmallImages) {
+                scrollTimeout = setTimeout(() => {
+                  gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i] } })
+                }, 500)
+              }
               break;
             }
           }
@@ -179,7 +190,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         return () => imagesContainer.removeEventListener("scroll", detectActiveImage)
       }
     }
-  }, [isMobileDevice])
+  }, [clickedSmallImages, isMobileDevice])
 
   // calculate active img on mobile
   useEffect(() => {
@@ -220,6 +231,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       }
     }
   }, [isClient, isLandscape, isMobileDevice, isMobileLandscape])
+
+  // scroll to active img when rotate mobile
+  useEffect(() => {
+    if (isMobileDevice) {
+      document.querySelectorAll(".image-mobile")[activeImage - 1].scrollIntoView(true)
+    }
+  }, [isLandscape, isMobileDevice])
 
   return (
     <>
@@ -344,11 +362,14 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                         key={item.id}
                         className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
                           "opacity-100": activeImage === i + 1,
-                          " opacity-50 hover:opacity-80": activeImage !== i + 1,
+                          "opacity-50 hover:opacity-80": activeImage !== i + 1,
                         })}
                         onClick={() => {
                           // document.querySelectorAll(".image")[i].scrollIntoView()
-                          gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[i] })
+                          dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: true })
+                          gsap.to(document.querySelector(".image-container"), {
+                            duration: 0.5, scrollTo: document.querySelectorAll(".image")[i], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: false })
+                          })
                         }}
                       >
                         <Image
@@ -403,7 +424,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         )}
 
         {isMobileDevice && (
-          <div key={isLandscape ? 2 : 1} className={clsx("image-container-mobile relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
+          <div className={clsx("image-container-mobile relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
             "h-screen": !isLandscape,
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
@@ -443,7 +464,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   setIsLandscape(!isLandscape);
                 }}
               >
-                <MdFullscreen className="text-[1.5rem] text-black/80" />
+                {isLandscape ? <MdFullscreenExit className="text-[1.5rem] text-black/80" /> : <MdFullscreen className="text-[1.5rem] text-black/80" />}
               </button>
             )}
           </div>

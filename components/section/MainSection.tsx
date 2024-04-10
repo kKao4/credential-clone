@@ -167,6 +167,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           for (let i = 0; i < images.length; i++) {
             if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) < images[i].offsetHeight / 2) {
               setActiveImage(i + 1)
+              setDraftActiveImage(i + 1)
               const rect = imagesThumb[i].getBoundingClientRect()
               if (!(rect.top >= headerRef.current!.offsetHeight && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 rect.right <= (window.innerWidth || document.documentElement.clientWidth))) {

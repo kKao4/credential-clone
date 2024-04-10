@@ -377,6 +377,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     width={1920}
                     height={1080}
                     priority={i < 2}
+                    quality={100}
                     className={clsx("mx-auto object-contain", { "h-full": !fitWidth, "w-full": fitWidth })}
                   />
                 </div>

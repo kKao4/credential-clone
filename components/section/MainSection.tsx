@@ -308,97 +308,99 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           </header>
         )}
 
-        <div className="relative flex flex-row">
-          {/* thumb images */}
-          <Transition
-            in={showSmallImage}
-            mountOnEnter
-            unmountOnExit
-            addEndListener={(node, done) => {
-              const imageContainer = document.querySelector<HTMLElement>(".image-container")
-              const ctx = gsap.context(() => {
-                if (showSmallImage) {
-                  const tl = gsap.timeline({})
-                  tl.to(smallImageModalRef.current, { flexBasis: "20%", duration: 0.4 })
-                  tl.set(imageContainer, { flexBasis: "80%" })
-                  tl.to(smallImageModalRef.current, { xPercent: 0, duration: 0.4 })
-                } else {
-                  const tl = gsap.timeline({})
-                  tl.to(smallImageModalRef.current, { xPercent: "-100", duration: 0.4 })
-                  tl.set(smallImageModalRef.current, { flexBasis: "0%" })
-                  tl.set(imageContainer, { marginLeft: "20vw", flexBasis: "100%" })
-                  tl.to(imageContainer, { marginLeft: 0, duration: 0.4 })
-                }
-              }, node);
-            }}
-          >
-            <div
-              ref={smallImageModalRef}
-              className="basis-1/5 flex-none overflow-y-auto"
+        {!isMobileDevice && (
+          <div className="relative flex flex-row">
+            {/* thumb images */}
+            <Transition
+              in={showSmallImage}
+              mountOnEnter
+              unmountOnExit
+              addEndListener={(node, done) => {
+                const imageContainer = document.querySelector<HTMLElement>(".image-container")
+                const ctx = gsap.context(() => {
+                  if (showSmallImage) {
+                    const tl = gsap.timeline({})
+                    tl.to(smallImageModalRef.current, { flexBasis: "20%", duration: 0.4 })
+                    tl.set(imageContainer, { flexBasis: "80%" })
+                    tl.to(smallImageModalRef.current, { xPercent: 0, duration: 0.4 })
+                  } else {
+                    const tl = gsap.timeline({})
+                    tl.to(smallImageModalRef.current, { xPercent: "-100", duration: 0.4 })
+                    tl.set(smallImageModalRef.current, { flexBasis: "0%" })
+                    tl.set(imageContainer, { marginLeft: "20vw", flexBasis: "100%" })
+                    tl.to(imageContainer, { marginLeft: 0, duration: 0.4 })
+                  }
+                }, node);
+              }}
             >
-              <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
-                {slideDataImages.map((item, i) => {
-                  return (
-                    <div
-                      key={item.id}
-                      className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
-                        "opacity-100": activeImage === i + 1,
-                        " opacity-50 hover:opacity-80": activeImage !== i + 1,
-                      })}
-                      onClick={() => {
-                        // document.querySelectorAll(".image")[i].scrollIntoView()
-                        gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[i] })
-                      }}
-                    >
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        width={140}
-                        height={78}
-                        priority={i < 5}
-                        className={clsx("h-[5.1rem] object-cover transition-400",
-                          { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
-                      />
-                      <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-            {/* )} */}
-          </Transition>
-          {/* images */}
-          <div
-            className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
-            style={{ gap: `calc(0.75rem*${zoomScale})` }}
-          >
-            {slideDataImages.map((item, i) => {
-              return (
-                <div
-                  key={item.id}
-                  className={clsx("image overflow-hidden transition-400", {
-                    "rotate-90": imageRotate === 90,
-                    "rotate-180": imageRotate === 180,
-                    "rotate-[270deg]": imageRotate === 270,
-                    "min-w-max": !fitWidth && zoomScale > 1,
-                    "w-full": fitWidth
+              <div
+                ref={smallImageModalRef}
+                className="basis-1/5 flex-none overflow-y-auto"
+              >
+                <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
+                  {slideDataImages.map((item, i) => {
+                    return (
+                      <div
+                        key={item.id}
+                        className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
+                          "opacity-100": activeImage === i + 1,
+                          " opacity-50 hover:opacity-80": activeImage !== i + 1,
+                        })}
+                        onClick={() => {
+                          // document.querySelectorAll(".image")[i].scrollIntoView()
+                          gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[i] })
+                        }}
+                      >
+                        <Image
+                          src={item.src}
+                          alt={item.alt}
+                          width={140}
+                          height={78}
+                          priority={i < 5}
+                          className={clsx("h-[5.1rem] object-cover transition-400",
+                            { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
+                        />
+                        <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
+                      </div>
+                    )
                   })}
-                  style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
-                >
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    width={1920}
-                    height={1080}
-                    priority={i < 2}
-                    quality={100}
-                    className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
-                  />
                 </div>
-              )
-            })}
-          </div>
-        </div >
+              </div>
+              {/* )} */}
+            </Transition>
+            {/* images */}
+            <div
+              className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
+              style={{ gap: `calc(0.75rem*${zoomScale})` }}
+            >
+              {slideDataImages.map((item, i) => {
+                return (
+                  <div
+                    key={item.id}
+                    className={clsx("image overflow-hidden transition-400", {
+                      "rotate-90": imageRotate === 90,
+                      "rotate-180": imageRotate === 180,
+                      "rotate-[270deg]": imageRotate === 270,
+                      "min-w-max": !fitWidth && zoomScale > 1,
+                      "w-full": fitWidth
+                    })}
+                    style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
+                  >
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      width={1920}
+                      height={1080}
+                      priority={i < 2}
+                      quality={100}
+                      className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </div >
+        )}
 
         {isMobileDevice && (
           <div key={isLandscape ? 2 : 1} className={clsx("image-container-mobile relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {

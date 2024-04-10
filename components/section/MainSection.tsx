@@ -346,7 +346,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                         " opacity-50 hover:opacity-80": activeImage !== i + 1,
                       })}
                       onClick={() => {
-                        setActiveImage(i + 1)
                         // document.querySelectorAll(".image")[i].scrollIntoView()
                         gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[i] })
                       }}

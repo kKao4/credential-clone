@@ -22,35 +22,24 @@ import { TbArrowAutofitWidth, TbArrowAutofitHeight } from "react-icons/tb";
 import { useIsClient } from "usehooks-ts";
 import { slideDataImages } from "@/app/data";
 import { agentHas } from "@/utils/agentHas";
+import gsap from "gsap"
+import ScrollToPlugin from "gsap/ScrollToPlugin";
 
-type TransitionStyles = {
-  [key in TransitionStatus]?: React.CSSProperties;
-};
-
-const smallSwiperTransitionDuration = 400;
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
   5,
 ];
 
-const smallSlideDefaultStyle = {
-  transition: `transform ${smallSwiperTransitionDuration}ms ease-out`,
-  transform: "translateX(0)",
-};
-const smallSlideTransitionStyles: TransitionStyles = {
-  entering: { transform: "translateX(0)" },
-  entered: { transform: "translateX(0)" },
-  exiting: { transform: "translateX(-100%)" },
-  exited: { transform: "translateX(-100%)" },
-};
-
 interface MainSectionProps {
   isMobileDevice: boolean | undefined
 }
 
+gsap.registerPlugin(ScrollToPlugin)
+
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const headerRef = useRef<HTMLHeadElement>(null)
-  const [showSmallIMage, setShowSmallImage] = useState(true);
+  const smallImageModalRef = useRef<HTMLDivElement>(null)
+  const [showSmallImage, setShowSmallImage] = useState(true);
   const [activeImage, setActiveImage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1);
   const [fitWidth, setFitWidth] = useState(false);
@@ -62,7 +51,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [draftZoomScale, setDraftZoomScale] = useState(1)
 
   // show/hide small swiper
-  const toggleSmallSwiper = () => setShowSmallImage(!showSmallIMage);
+  const toggleSmallSwiper = () => setShowSmallImage(!showSmallImage);
 
   // toggle fit width slide
   const toggleFitWidth = () => setFitWidth(!fitWidth);
@@ -84,7 +73,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     // set activeImage lai thanh gia tri hop le
     setActiveImage(draft);
     setDraftActiveImage(draft)
-    document.querySelectorAll(".image")[draft - 1].scrollIntoView()
+    document.querySelectorAll(".image")[draft - 1].scrollIntoView({ behavior: "smooth" })
+    gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[draft - 1] })
   };
 
   // set zoom scale
@@ -158,12 +148,14 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   // calculate active img on desktop
   useEffect(() => {
     if (!isMobileDevice) {
+      let scrollTimeout: any;
       const imagesContainer = document.querySelector<HTMLElement>(".image-container")
       const images = document.querySelectorAll<HTMLElement>(".image")
       const imagesThumbContainer = document.querySelector<HTMLElement>(".image-thumb-container")
       const imagesThumb = document.querySelectorAll<HTMLElement>(".image-thumb")
       if (imagesContainer && headerRef.current && imagesThumbContainer) {
         const detectActiveImage = () => {
+          clearTimeout(scrollTimeout);
           for (let i = 0; i < images.length; i++) {
             if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) < images[i].offsetHeight / 2) {
               setActiveImage(i + 1)
@@ -171,9 +163,14 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               const rect = imagesThumb[i].getBoundingClientRect()
               if (!(rect.top >= headerRef.current!.offsetHeight && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 rect.right <= (window.innerWidth || document.documentElement.clientWidth))) {
-                console.log("scroll")
-                imagesThumbContainer.scrollTo({ top: imagesThumb[i].offsetTop - parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")), behavior: "smooth" })
+                // imagesThumbContainer.scrollTo({ top: imagesThumb[i].offsetTop - parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")), behavior: "smooth" })
+                gsap.to(imagesThumbContainer, {
+                  duration: 0.5, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")) }
+                })
               }
+              scrollTimeout = setTimeout(() => {
+                gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i] } })
+              }, 500)
               break;
             }
           }
@@ -314,61 +311,78 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         <div className="relative flex flex-row">
           {/* thumb images */}
           <Transition
-            in={showSmallIMage}
-            timeout={smallSwiperTransitionDuration}
+            in={showSmallImage}
+            mountOnEnter
             unmountOnExit
+            addEndListener={(node, done) => {
+              const imageContainer = document.querySelector<HTMLElement>(".image-container")
+              const ctx = gsap.context(() => {
+                if (showSmallImage) {
+                  const tl = gsap.timeline({})
+                  tl.to(smallImageModalRef.current, { flexBasis: "20%", duration: 0.4 })
+                  tl.set(imageContainer, { flexBasis: "80%" })
+                  tl.to(smallImageModalRef.current, { xPercent: 0, duration: 0.4 })
+                } else {
+                  const tl = gsap.timeline({})
+                  tl.to(smallImageModalRef.current, { xPercent: "-100", duration: 0.4 })
+                  tl.set(smallImageModalRef.current, { flexBasis: "0%" })
+                  tl.set(imageContainer, { marginLeft: "20vw", flexBasis: "100%" })
+                  tl.to(imageContainer, { marginLeft: 0, duration: 0.4 })
+                }
+              }, node);
+            }}
           >
-            {(state) => (
-              <div
-                className="basis-1/5 flex-none overflow-y-auto transition-400" style={{
-                  ...smallSlideDefaultStyle,
-                  ...smallSlideTransitionStyles[state],
-                }}
-              >
-                <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
-                  {slideDataImages.map((item, i) => {
-                    return (
-                      <div
-                        key={item.id}
-                        className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
-                          "opacity-100": activeImage === i + 1,
-                          " opacity-50 hover:opacity-80": activeImage !== i + 1,
-                        })}
-                        onClick={() => {
-                          setActiveImage(i + 1)
-                          document.querySelectorAll(".image")[i].scrollIntoView()
-                        }}
-                      >
-                        <Image
-                          src={item.src}
-                          alt={item.alt}
-                          width={140}
-                          height={78}
-                          priority={i < 5}
-                          className={clsx("h-[5.1rem] object-cover transition-400",
-                            { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
-                        />
-                        <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
-                      </div>
-                    )
-                  })}
-                </div>
+            <div
+              ref={smallImageModalRef}
+              className="basis-1/5 flex-none overflow-y-auto"
+            >
+              <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
+                {slideDataImages.map((item, i) => {
+                  return (
+                    <div
+                      key={item.id}
+                      className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
+                        "opacity-100": activeImage === i + 1,
+                        " opacity-50 hover:opacity-80": activeImage !== i + 1,
+                      })}
+                      onClick={() => {
+                        setActiveImage(i + 1)
+                        // document.querySelectorAll(".image")[i].scrollIntoView()
+                        gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[i] })
+                      }}
+                    >
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        width={140}
+                        height={78}
+                        priority={i < 5}
+                        className={clsx("h-[5.1rem] object-cover transition-400",
+                          { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
+                      />
+                      <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
+                    </div>
+                  )
+                })}
               </div>
-            )}
+            </div>
+            {/* )} */}
           </Transition>
           {/* images */}
           <div
-            className={clsx("h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container snap-y transition-400 items-center justify-center", { "basis-full": !showSmallIMage, "basis-4/5 w-full": showSmallIMage })}
+            className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
             style={{ gap: `calc(0.75rem*${zoomScale})` }}
           >
             {slideDataImages.map((item, i) => {
               return (
                 <div
                   key={item.id}
-                  className={clsx("snap-start snap-normal image overflow-hidden min-w-max transition-400", {
+                  className={clsx("image overflow-hidden transition-400", {
                     "rotate-90": imageRotate === 90,
                     "rotate-180": imageRotate === 180,
                     "rotate-[270deg]": imageRotate === 270,
+                    "min-w-max": !fitWidth,
+                    "w-full": fitWidth
                   })}
                   style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
                 >
@@ -385,7 +399,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               )
             })}
           </div>
-        </div>
+        </div >
 
         {isMobileDevice && (
           <div key={isLandscape ? 2 : 1} className={clsx("image-container-mobile relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
@@ -432,9 +446,10 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               </button>
             )}
           </div>
-        )}
+        )
+        }
 
-      </main>
+      </main >
     </>
   );
 }

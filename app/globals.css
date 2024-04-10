@@ -18,10 +18,10 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .transition-200 {
-  @apply transition-all duration-200 ease-out !important;
+  @apply transition-all duration-200 ease-out;
 }
 .transition-400 {
-  @apply transition-all duration-400 ease-out !important;
+  @apply transition-all duration-400 ease-out;
 }
 
 *::-webkit-scrollbar {

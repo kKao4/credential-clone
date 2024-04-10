@@ -380,7 +380,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     "rotate-90": imageRotate === 90,
                     "rotate-180": imageRotate === 180,
                     "rotate-[270deg]": imageRotate === 270,
-                    "min-w-max": !fitWidth && zoomScale <= 1,
+                    "min-w-max": !fitWidth && zoomScale > 1,
                     "w-full": fitWidth
                   })}
                   style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}

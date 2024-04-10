@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/thumbs";
@@ -9,19 +8,9 @@ import "swiper/css/scrollbar";
 import "swiper/css/effect-creative";
 import "swiper/css/grid";
 import { useEffect, useRef, useState } from "react";
-import {
-  FreeMode,
-  Thumbs,
-  Mousewheel,
-  Scrollbar,
-  Grid,
-  Keyboard,
-} from "swiper/modules";
-
 import { FaBars } from "react-icons/fa";
 import { Transition, TransitionStatus } from "react-transition-group";
 import clsx from "clsx";
-import { Swiper as SwiperType } from "swiper/types";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
 import { FaMinus, FaPlus } from "react-icons/fa6";
@@ -29,14 +18,8 @@ import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
 import { MdRotate90DegreesCcw, MdFullscreen } from "react-icons/md";
-import { TbArrowAutofitWidth } from "react-icons/tb";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import {
-  useOnClickOutside,
-  useWindowSize,
-  useIsClient
-} from "usehooks-ts";
-import ButtonOption from "@/components/button/ButtonOption";
+import { TbArrowAutofitWidth, TbArrowAutofitHeight } from "react-icons/tb";
+import { useIsClient } from "usehooks-ts";
 import { slideDataImages } from "@/app/data";
 import { agentHas } from "@/utils/agentHas";
 
@@ -45,32 +28,20 @@ type TransitionStyles = {
 };
 
 const smallSwiperTransitionDuration = 400;
-const moreOptionsTransitionDuration = 150;
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
   5,
 ];
 
-const smallSwiperDefaultStyle = {
+const smallSlideDefaultStyle = {
   transition: `transform ${smallSwiperTransitionDuration}ms ease-out`,
   transform: "translateX(0)",
 };
-const moreOptionsDefaultStyle = {
-  transition: `opacity ${moreOptionsTransitionDuration}ms ease-out`,
-  opacity: 0,
-};
-
-const smallSwiperTransitionStyles: TransitionStyles = {
+const smallSlideTransitionStyles: TransitionStyles = {
   entering: { transform: "translateX(0)" },
   entered: { transform: "translateX(0)" },
   exiting: { transform: "translateX(-100%)" },
   exited: { transform: "translateX(-100%)" },
-};
-const moreOptionsTransitionStyles: TransitionStyles = {
-  entering: { opacity: 1 },
-  entered: { opacity: 1 },
-  exiting: { opacity: 0 },
-  exited: { opacity: 0 },
 };
 
 interface MainSectionProps {
@@ -78,171 +49,73 @@ interface MainSectionProps {
 }
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
-  const swiperRef = useRef<SwiperType | null>(null);
-  const moreOptionRef = useRef<HTMLDivElement>(null);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  const [showSmallSwiper, setShowSmallSwiper] = useState(true);
-  const [activeSlide, setActiveSlide] = useState(1);
+  const headerRef = useRef<HTMLHeadElement>(null)
+  const [showSmallIMage, setShowSmallImage] = useState(true);
+  const [activeImage, setActiveImage] = useState(1);
   const [zoomScale, setZoomScale] = useState(1);
   const [fitWidth, setFitWidth] = useState(false);
-  const [slideRotate, setSlideRotate] = useState(0);
-  const [moreOptions, setMoreOptions] = useState(false);
-  const [options, setOptions] = useState({ twoPage: false, fullScreen: false });
-  const { width } = useWindowSize();
+  const [imageRotate, setImageRotate] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileLandscape, setIsMobileLandscape] = useState(false)
   const isClient = useIsClient()
-
-  // close more options
-  const closeMoreOptions = () => {
-    setMoreOptions(false);
-  };
-
-  // close more options pop up
-  useOnClickOutside(moreOptionRef, closeMoreOptions);
-
-  // disable full screen
-  useEffect(() => {
-    if (options.fullScreen) {
-      const toggleFullscreen = () => {
-        setOptions((prevState) => {
-          return { ...prevState, fullScreen: false };
-        });
-      };
-      const screenChangeDisableFullscreen = () => {
-        if (!document.fullscreenElement) {
-          toggleFullscreen();
-        }
-      };
-      const screenErrorDisableFullscreen = () => {
-        toggleFullscreen();
-      };
-      const keyDownDisableFullscreen = (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-          if (!document.fullscreenElement) {
-            toggleFullscreen();
-          }
-        }
-      };
-      window.addEventListener(
-        "fullscreenchange",
-        screenChangeDisableFullscreen,
-      );
-      window.addEventListener("fullscreenerror", screenErrorDisableFullscreen);
-      window.addEventListener("keydown", keyDownDisableFullscreen);
-      return () => {
-        window.removeEventListener(
-          "fullscreenchange",
-          screenChangeDisableFullscreen,
-        );
-        window.removeEventListener(
-          "fullscreenerror",
-          screenErrorDisableFullscreen,
-        );
-        window.removeEventListener("keydown", keyDownDisableFullscreen);
-      };
-    }
-  }, [options.fullScreen]);
-
-  // show/hide slide scrollbar when out/in full screen mode
-  useEffect(() => {
-    const bigSwiperScrollbar = document
-      .querySelector<HTMLElement>(".big-swiper")
-      ?.querySelector<HTMLElement>(".swiper-scrollbar");
-    if (bigSwiperScrollbar) {
-      if (options.fullScreen) {
-        bigSwiperScrollbar.style.visibility = "hidden";
-      } else {
-        bigSwiperScrollbar.style.visibility = "visible";
-      }
-    }
-  }, [options.fullScreen]);
+  const [draftActiveImage, setDraftActiveImage] = useState(1)
+  const [draftZoomScale, setDraftZoomScale] = useState(1)
 
   // show/hide small swiper
-  const toggleSmallSwiper = () => setShowSmallSwiper(!showSmallSwiper);
+  const toggleSmallSwiper = () => setShowSmallImage(!showSmallIMage);
 
   // toggle fit width slide
   const toggleFitWidth = () => setFitWidth(!fitWidth);
 
   // change rotate slide
   const handleRotateSlide = () => {
-    if (slideRotate === 270) {
-      setSlideRotate(0);
+    if (imageRotate === 270) {
+      setImageRotate(0);
     } else {
-      setSlideRotate(slideRotate + 90);
+      setImageRotate(imageRotate + 90);
     }
-  };
-
-  // toggle more options pop up
-  const handleMoreOptions = () => setMoreOptions(!moreOptions);
-
-  // handle toggle two page mode
-  const toggleTwoPageMode = () =>
-    setOptions((prevState) => {
-      closeMoreOptions();
-      return { ...prevState, twoPage: !prevState.twoPage };
-    });
-
-  // set activeSlide
-  const handleChangeInputActiveSlide = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setActiveSlide(Number(e.target.value));
   };
 
   // handle action di chuyen den slide
-  const handleChangeActiveSlide = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitActiveImage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // tim slide hop le
-    const s = Math.min(Math.max(1, activeSlide), slideDataImages.length);
-    // set activeSlide lai thanh gia tri hop le
-    setActiveSlide(s);
-    // di chuyen den slide do
-    if (swiperRef.current) {
-      swiperRef.current.slideTo(s - 1);
-    }
+    const draft = Math.min(Math.max(1, draftActiveImage), slideDataImages.length);
+    // set activeImage lai thanh gia tri hop le
+    setActiveImage(draft);
+    setDraftActiveImage(draft)
+    document.querySelectorAll(".image")[draft - 1].scrollIntoView()
   };
 
   // set zoom scale
   const handleChangeInputZoomSlide = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setZoomScale(Number(e.target.value.replace("%", "")) / 100);
+    setDraftZoomScale(Number(e.target.value.replace("%", "")) / 100);
   };
 
   // handle action zoom slide
   const handleChangeZoomSlide = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // tim zoomScale hop le
-    const z = Math.min(Math.max(zoomScaleArray[0], zoomScale), 5);
+    const draft = Math.min(Math.max(zoomScaleArray[0], draftZoomScale), 5);
     // set zoomScale lai thanh gia tri hop le
-    setZoomScale(z);
+    setZoomScale(draft);
+    setDraftZoomScale(draft)
   };
 
   // handle action plus zoomScale
   const handlePlusZoomSlide = () => {
     const z = findNearestBiggerNumber(zoomScale, sortAsc(zoomScaleArray));
     setZoomScale(z as number);
+    setDraftZoomScale(z as number)
   };
 
   // handle action minus zoomScale
   const handleMinusZoomSlide = () => {
     const z = findNearestSmallerNumber(zoomScale, sortAsc(zoomScaleArray));
     setZoomScale(z as number);
-  };
-
-  // toggle full screen
-  const toggleFullscreen = () => {
-    closeMoreOptions();
-    setOptions((prevState) => {
-      return { ...prevState, fullScreen: !prevState.fullScreen };
-    });
-    const elem = document.querySelector(".big-swiper");
-    if (elem) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      }
-    }
+    setDraftZoomScale(z as number)
   };
 
   // config for full screen mode mobile
@@ -263,13 +136,12 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
       htmlElement.style.right = "0"
     } else {
       htmlElement.style.transform = "none";
-      htmlElement.style.width = "100vw";
-      htmlElement.style.height = "100vh";
+      htmlElement.style.width = "auto";
+      htmlElement.style.height = "auto";
       htmlElement.style.overflow = "auto"
       htmlElement.style.position = "static"
     }
   }, [isLandscape, isMobileLandscape]);
-
 
   // detect user rotate in mobile device
   useEffect(() => {
@@ -283,43 +155,73 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [])
 
-  // calculate active img
+  // calculate active img on desktop
   useEffect(() => {
-    const imagesContainer = document.querySelector<HTMLElement>(".image-container")
-    if (imagesContainer && isClient) {
-      const fnc = () => {
-        const images = document.querySelectorAll<HTMLElement>(".image")
-        let distanceArrayPortrait: number[] = []
-        let distanceArrayLandscape: number[] = []
-        // not full screen mode mobile
-        if (!isLandscape) {
-          images.forEach((img, i) => {
-            distanceArrayPortrait.push(img.getBoundingClientRect().top)
-          })
-          for (let i = 0; i < distanceArrayPortrait.length; i++) {
-            if (Math.abs(distanceArrayPortrait[i]) <= images[i].offsetHeight / 2) {
-              setActiveSlide(i + 1)
-              break
+    if (!isMobileDevice) {
+      const imagesContainer = document.querySelector<HTMLElement>(".image-container")
+      const images = document.querySelectorAll<HTMLElement>(".image")
+      const imagesThumbContainer = document.querySelector<HTMLElement>(".image-thumb-container")
+      const imagesThumb = document.querySelectorAll<HTMLElement>(".image-thumb")
+      if (imagesContainer && headerRef.current && imagesThumbContainer) {
+        const detectActiveImage = () => {
+          for (let i = 0; i < images.length; i++) {
+            if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) < images[i].offsetHeight / 2) {
+              setActiveImage(i + 1)
+              const rect = imagesThumb[i].getBoundingClientRect()
+              if (!(rect.top >= headerRef.current!.offsetHeight && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth))) {
+                console.log("scroll")
+                imagesThumbContainer.scrollTo({ top: imagesThumb[i].offsetTop - parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")), behavior: "smooth" })
+              }
+              break;
             }
           }
         }
-        // full screen mode mobile
-        else {
-          images.forEach((img, i) => {
-            distanceArrayLandscape.push(img.getBoundingClientRect().left)
-          })
-          for (let i = 0; i < distanceArrayLandscape.length; i++) {
-            if (Math.abs(distanceArrayLandscape[i]) <= images[i].offsetHeight / 2) {
-              setActiveSlide(i + 1)
-              break
-            }
-          }
-        }
+        imagesContainer.addEventListener("scroll", detectActiveImage)
+        return () => imagesContainer.removeEventListener("scroll", detectActiveImage)
       }
-      imagesContainer.addEventListener("scroll", fnc)
-      return () => imagesContainer.removeEventListener("scroll", fnc)
     }
-  }, [isClient, isLandscape, isMobileLandscape])
+  }, [isMobileDevice])
+
+  // calculate active img on mobile
+  useEffect(() => {
+    if (isMobileDevice) {
+      const imagesContainer = document.querySelector<HTMLElement>(".image-container-mobile")
+      const images = document.querySelectorAll<HTMLElement>(".image-mobile")
+      if (imagesContainer && isClient) {
+        const fnc = () => {
+          let distanceArrayPortrait: number[] = []
+          let distanceArrayLandscape: number[] = []
+          // not full screen mode mobile
+          if (!isLandscape) {
+            images.forEach((img, i) => {
+              distanceArrayPortrait.push(img.getBoundingClientRect().top)
+            })
+            for (let i = 0; i < distanceArrayPortrait.length; i++) {
+              if (Math.abs(distanceArrayPortrait[i]) <= images[i].offsetHeight / 2) {
+                setActiveImage(i + 1)
+                break
+              }
+            }
+          }
+          // full screen mode mobile
+          else {
+            images.forEach((img, i) => {
+              distanceArrayLandscape.push(img.getBoundingClientRect().left)
+            })
+            for (let i = 0; i < distanceArrayLandscape.length; i++) {
+              if (Math.abs(distanceArrayLandscape[i]) <= images[i].offsetHeight / 2) {
+                setActiveImage(i + 1)
+                break
+              }
+            }
+          }
+        }
+        imagesContainer.addEventListener("scroll", fnc)
+        return () => imagesContainer.removeEventListener("scroll", fnc)
+      }
+    }
+  }, [isClient, isLandscape, isMobileDevice, isMobileLandscape])
 
   return (
     <>
@@ -327,6 +229,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         {/* header */}
         {!isMobileDevice && (
           <header
+            ref={headerRef}
             className="flex relative h-[7.5vh] bg-gray-main w-full z-20 text-white px-6 py-2 flex-row items-center"
             style={{
               boxShadow:
@@ -349,13 +252,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               {/* form change active slide */}
               <form
                 className="flex flex-row items-center mr-4"
-                onSubmit={(e) => handleChangeActiveSlide(e)}
+                onSubmit={(e) => handleSubmitActiveImage(e)}
               >
                 <input
                   type="number"
                   className="text-0.875 text-white w-7 px-1 h-5 bg-neutral-900 focus:outline-none text-center"
-                  value={activeSlide}
-                  onChange={(e) => handleChangeInputActiveSlide(e)}
+                  value={draftActiveImage}
+                  onChange={(e) => setDraftActiveImage(parseInt(e.target.value))}
                 />
                 <p className="text-0.75 text-white ml-1.5">/</p>
                 <p className="text-0.75 text-white ml-1.5">
@@ -374,21 +277,18 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 <ButtonIcon
                   type="button"
                   onClick={handleMinusZoomSlide}
-                  disabled={options.twoPage}
                 >
                   <FaMinus className="" />
                 </ButtonIcon>
                 <input
                   type="text"
                   className="text-0.875 text-white w-12 px-1 h-5 bg-neutral-900 focus:outline-none text-center mx-1.5 disabled:opacity-40 disabled:select-none"
-                  value={`${Math.floor(zoomScale * 100)}%`}
+                  value={`${Math.floor(draftZoomScale * 100)}%`}
                   onChange={(e) => handleChangeInputZoomSlide(e)}
-                  disabled={options.twoPage}
                 />
                 <ButtonIcon
                   type="button"
                   onClick={handlePlusZoomSlide}
-                  disabled={options.twoPage}
                 >
                   <FaPlus className="" />
                 </ButtonIcon>
@@ -400,193 +300,91 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               {/* full width and rotate */}
               <div className="flex flex-row items-center ml-4">
                 <ButtonIcon onClick={toggleFitWidth}>
-                  <TbArrowAutofitWidth className="" />
+                  {fitWidth ? <TbArrowAutofitWidth className="" /> : <TbArrowAutofitHeight className="" />}
                 </ButtonIcon>
                 <ButtonIcon onClick={handleRotateSlide}>
                   <MdRotate90DegreesCcw className="" />
                 </ButtonIcon>
               </div>
             </div>
-
-            {/* download, print */}
-            <div className="ml-auto flex flex-row items-center">
-              {/* more options */}
-              <div ref={moreOptionRef} className="relative ml-1.5">
-                {/* more options button */}
-                <ButtonIcon isActive={moreOptions} onClick={handleMoreOptions}>
-                  <BsThreeDotsVertical className="" />
-                </ButtonIcon>
-
-                {/* more options pop up */}
-                <Transition
-                  in={moreOptions}
-                  timeout={moreOptionsTransitionDuration}
-                >
-                  {(state) => (
-                    <div
-                      className="absolute bottom-0 translate-y-full py-2 right-0 w-max z-40 rounded-md bg-neutral-900"
-                      style={{
-                        ...moreOptionsDefaultStyle,
-                        ...moreOptionsTransitionStyles[state],
-                        boxShadow:
-                          "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
-                      }}
-                    >
-                      <ButtonOption
-                        isActive={options.twoPage}
-                        text="Chế độ xem hai trang"
-                        onClick={toggleTwoPageMode}
-                      />
-                      <div className="w-full my-1.5 h-px bg-neutral-700" />
-                      <ButtonOption
-                        text="Thuyết trình"
-                        isActive={options.fullScreen}
-                        onClick={toggleFullscreen}
-                      />
-                    </div>
-                  )}
-                </Transition>
-              </div>
-            </div>
           </header>
         )}
 
-        {moreOptions && !isMobileDevice && (
-          <div className="fixed w-full overflow-hidden h-screen z-10 bg-transparent" />
-        )}
-
-        {/* 2 swiper */}
-        {!isMobileDevice && (
-          <div className="h-full lg:h-[92.5vh] w-full lg:flex flex-row">
-            {/* small swiper */}
-            <div
-              className={clsx("h-full transition-400", {
-                "w-[19%]": showSmallSwiper,
-                "w-0": !showSmallSwiper,
-              })}
-            >
-              <Transition
-                in={showSmallSwiper}
-                timeout={smallSwiperTransitionDuration}
+        <div className="relative flex flex-row">
+          {/* thumb images */}
+          <Transition
+            in={showSmallIMage}
+            timeout={smallSwiperTransitionDuration}
+            unmountOnExit
+          >
+            {(state) => (
+              <div
+                className="basis-1/5 flex-none overflow-y-auto transition-400" style={{
+                  ...smallSlideDefaultStyle,
+                  ...smallSlideTransitionStyles[state],
+                }}
               >
-                {(state) => (
-                  <Swiper
-                    style={{
-                      ...smallSwiperDefaultStyle,
-                      ...smallSwiperTransitionStyles[state],
-                    }}
-                    onSwiper={setThumbsSwiper as any}
-                    slidesPerView="auto"
-                    speed={400}
-                    spaceBetween={(width / 100) * 2}
-                    mousewheel={{ sensitivity: 2 }}
-                    direction="vertical"
-                    freeMode
-                    wrapperClass="swiper-wrapper initial-small-swiper"
-                    scrollbar={{
-                      enabled: true,
-                      draggable: true,
-                    }}
-                    modules={[FreeMode, Thumbs, Mousewheel, Scrollbar]}
-                    className={clsx("small-swiper")}
-                    onAfterInit={() => {
-                      if (document
-                        .querySelectorAll(".swiper-wrapper")[0].classList.contains("initial-small-swiper")) {
-                        document
-                          .querySelectorAll(".swiper-wrapper")[0]
-                          ?.classList.remove("initial-small-swiper");
-                      }
-                    }}
-                  >
-                    {slideDataImages.map((item, i) => {
-                      return (
-                        <SwiperSlide key={item.id}>
-                          <Image
-                            src={item.src}
-                            alt={item.alt}
-                            width={1920}
-                            height={1080}
-                            priority={i < 5}
-                          />
-                          <p className="swiper-slide-text">{i + 1}</p>
-                        </SwiperSlide>
-                      );
-                    })}
-                  </Swiper>
-                )}
-              </Transition>
-            </div>
-            {/* big swiper */}
-            <Swiper
-              speed={400}
-              direction="vertical"
-              thumbs={{ swiper: thumbsSwiper }}
-              mousewheel={{ enabled: true, sensitivity: 3 }}
-              slidesPerView={options.twoPage ? 2 : 1}
-              slidesPerGroup={options.twoPage ? 2 : 1}
-              scrollbar={{
-                enabled: !isMobileDevice,
-                draggable: true,
-              }}
-              grid={
-                options.twoPage
-                  ? {
-                    fill: "column",
-                  }
-                  : undefined
-              }
-              zoom={true}
-              autoHeight={true}
-              keyboard={true}
-              modules={[
-                Thumbs,
-                Mousewheel,
-                Scrollbar,
-                Grid,
-                Keyboard,
-                FreeMode
-              ]}
-              onBeforeInit={(swiper) => {
-                swiperRef.current = swiper;
-              }}
-              onActiveIndexChange={(swiper) => {
-                setActiveSlide(swiper.activeIndex + 1);
-              }}
-              wrapperClass="swiper-wrapper initial-big-swiper"
-              onAfterInit={() => {
-                if (document.querySelectorAll(".swiper-wrapper")[1].classList.contains("initial-big-swiper")) {
-                  document.querySelectorAll(".swiper-wrapper")[1]?.classList.remove("initial-big-swiper")
-                }
-              }}
-              className={clsx("big-swiper", {
-                "full-width": !showSmallSwiper,
-                "fit-width": fitWidth,
-              })}
-            >
-              {slideDataImages.map((item, i) => {
-                return (
-                  <SwiperSlide key={item.id}>
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={1920}
-                      height={1080}
-                      priority={i < 2}
-                      style={{ transform: `scale(${zoomScale}) rotate(${slideRotate}deg)` }}
-                      className={clsx("swiper-slide-image", {
-                        "fit-width": fitWidth,
-                        "not-fit-width": !fitWidth,
-                      })}
-                    />
-                  </SwiperSlide>
-                );
-              })}
-            </Swiper>
+                <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
+                  {slideDataImages.map((item, i) => {
+                    return (
+                      <div
+                        key={item.id}
+                        className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
+                          "opacity-100": activeImage === i + 1,
+                          " opacity-50 hover:opacity-80": activeImage !== i + 1,
+                        })}
+                        onClick={() => {
+                          setActiveImage(i + 1)
+                          document.querySelectorAll(".image")[i].scrollIntoView()
+                        }}
+                      >
+                        <Image
+                          src={item.src}
+                          alt={item.alt}
+                          width={140}
+                          height={78}
+                          className={clsx("h-[5.1rem] object-cover transition-400",
+                            { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
+                        />
+                        <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </Transition>
+          {/* images */}
+          <div
+            className={clsx("h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container snap-y transition-400 items-center justify-center", { "basis-full": !showSmallIMage, "basis-4/5 w-full": showSmallIMage })}
+            style={{ gap: `calc(0.75rem*${zoomScale})` }}
+          >
+            {slideDataImages.map((item) => {
+              return (
+                <div
+                  key={item.id}
+                  className={clsx("snap-start snap-normal image overflow-hidden w-full transition-400", {
+                    "rotate-90": imageRotate === 90,
+                    "rotate-180": imageRotate === 180,
+                    "rotate-[270deg]": imageRotate === 270,
+                  })}
+                  style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    width={1920}
+                    height={1080}
+                    className={clsx("mx-auto object-contain", { "h-full": !fitWidth, "w-full": fitWidth })}
+                  />
+                </div>
+              )
+            })}
           </div>
-        )}
+        </div>
 
         {isMobileDevice && (
-          <div key={isLandscape ? 2 : 1} className={clsx("image-container relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
+          <div key={isLandscape ? 2 : 1} className={clsx("image-container-mobile relative grid grid-cols-1 text-white gap-1.5 overflow-auto h-full", {
             "h-screen": !isLandscape,
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
@@ -597,7 +395,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   <Image
                     src={item.src}
                     alt={item.alt}
-                    className={clsx("image", {
+                    className={clsx("image-mobile", {
                       "w-full object-cover": !isLandscape,
                       "h-[100vw] object-contain": isLandscape && !isMobileLandscape
                     })}
@@ -612,7 +410,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             {/* active slide mobile */}
             {isMobileDevice && (
               <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
-                {activeSlide} / {slideDataImages.length}
+                {activeImage} / {slideDataImages.length}
               </div>
             )
             }

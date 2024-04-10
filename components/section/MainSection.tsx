@@ -365,7 +365,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               return (
                 <div
                   key={item.id}
-                  className={clsx("snap-start snap-normal image overflow-hidden w-full transition-400", {
+                  className={clsx("snap-start snap-normal image overflow-hidden min-w-max transition-400", {
                     "rotate-90": imageRotate === 90,
                     "rotate-180": imageRotate === 180,
                     "rotate-[270deg]": imageRotate === 270,
@@ -379,7 +379,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     height={1080}
                     priority={i < 2}
                     quality={100}
-                    className={clsx("mx-auto object-contain", { "h-full": !fitWidth, "w-full": fitWidth })}
+                    className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
                   />
                 </div>
               )

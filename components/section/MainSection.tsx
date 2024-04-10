@@ -343,6 +343,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                           alt={item.alt}
                           width={140}
                           height={78}
+                          priority={i < 5}
                           className={clsx("h-[5.1rem] object-cover transition-400",
                             { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
                         />
@@ -359,7 +360,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             className={clsx("h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container snap-y transition-400 items-center justify-center", { "basis-full": !showSmallIMage, "basis-4/5 w-full": showSmallIMage })}
             style={{ gap: `calc(0.75rem*${zoomScale})` }}
           >
-            {slideDataImages.map((item) => {
+            {slideDataImages.map((item, i) => {
               return (
                 <div
                   key={item.id}
@@ -375,6 +376,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     alt={item.alt}
                     width={1920}
                     height={1080}
+                    priority={i < 2}
                     className={clsx("mx-auto object-contain", { "h-full": !fitWidth, "w-full": fitWidth })}
                   />
                 </div>

@@ -26,6 +26,8 @@ import ScrollToPlugin from "gsap/ScrollToPlugin";
 import { clickedSmallImagesReducer } from "@/reducer/clickedSmallImagesReducer";
 import useSWR from "swr"
 import { fetcher } from "@/utils/fetcher";
+import SmallImagesSkeleton from "../skeleton/SmallImagesSkeleton";
+import BigImageSkeleton from "../skeleton/BigImageSkeleton";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -116,6 +118,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     setBeforeZoomActiveImage(activeImage)
   };
 
+  // set data after fetch
   useEffect(() => {
     if (data) {
       dispatchClickedSmallImages({
@@ -297,7 +300,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 />
                 <p className="text-0.75 text-white ml-1.5">/</p>
                 <p className="text-0.75 text-white ml-1.5">
-                  {isLoading ? <TbLoader2 className="text-0.75 animate-spin" /> : data.acf.images.length}
+                  {isLoading ? <TbLoader2 className="animate-spin" /> : data.acf.images.length}
                 </p>
               </form>
 
@@ -375,7 +378,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 className="basis-1/5 flex-none overflow-y-auto"
               >
                 <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
-                  {isLoading ? "hihi" : (
+                  {isLoading ? <SmallImagesSkeleton /> : (
                     <>
                       {data.acf.images.map((item: any, i: number) => {
                         return (
@@ -400,7 +403,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                               height={78}
                               priority={i < 5}
                               className={clsx("h-[5.1rem] object-cover transition-400",
-                                { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
+                                { "ring-[6px] ring-blue-main": activeImage === i + 1 })}
                             />
                             <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
                           </div>
@@ -417,7 +420,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
               style={{ gap: `calc(0.75rem*${zoomScale})` }}
             >
-              {isLoading ? "hihi" : (
+              {isLoading ? <BigImageSkeleton /> : (
                 <>
                   {data.acf.images.map((item: any, i: number) => {
                     return (

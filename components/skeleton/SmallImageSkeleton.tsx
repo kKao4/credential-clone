@@ -7,7 +7,7 @@ interface SmallImageSkeletonProps {
 export default function SmallImageSkeleton({ text }: SmallImageSkeletonProps) {
   return (
     <div
-      className="mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none"
+      className="mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer scroll-py-4 select-none"
     >
       <div
         className="h-[5.1rem] w-full bg-neutral-400 animate-pulse"

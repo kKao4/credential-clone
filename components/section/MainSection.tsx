@@ -28,6 +28,8 @@ import useSWR from "swr"
 import { fetcher } from "@/utils/fetcher";
 import SmallImagesSkeleton from "../skeleton/SmallImagesSkeleton";
 import BigImageSkeleton from "../skeleton/BigImageSkeleton";
+import { useGSAP } from "@gsap/react"
+import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -38,7 +40,7 @@ interface MainSectionProps {
   isMobileDevice: boolean | undefined
 }
 
-gsap.registerPlugin(ScrollToPlugin)
+gsap.registerPlugin(useGSAP, ScrollToPlugin)
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const headerRef = useRef<HTMLHeadElement>(null)
@@ -261,6 +263,27 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [beforeZoomActiveImage, data, isClient, zoomScale])
 
+  useGSAP(() => {
+    if (data) {
+      if (!isMobileDevice) {
+        const smallImages = gsap.utils.toArray(".image-thumb")
+        const bigImages = gsap.utils.toArray(".real-image")
+        smallImages.forEach((item, i) => {
+          gsap.to(item as any, { x: 0, visibility: "visible", duration: 0.6, delay: i * 0.08 })
+        })
+        bigImages.forEach((item, i) => {
+          gsap.to(item as any, { y: 0, visibility: "visible", duration: 1.2, delay: i * 0.08, ease: "power2.out" })
+        })
+        gsap.to(".title", { y: 0, autoAlpha: 1, duration: 0.8, delay: 0.4, ease: "power2.out" })
+      } else {
+        const images = gsap.utils.toArray(".image-mobile")
+        images.forEach((item, i) => {
+          gsap.to(item as any, { x: 0, autoAlpha: 1, duration: 0.8, delay: i * 0.08 })
+        })
+      }
+    }
+  }, [data, isMobileDevice])
+
   return (
     <>
       <main className="relative bg-gray-main h-screen">
@@ -275,13 +298,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             }}
           >
             <div className="flex flex-row items-center">
-              {/* toggle small swiper */}
+              {/* toggle small image container */}
               <ButtonIcon onClick={toggleSmallSwiper}>
                 <FaBars className="text-neutral-100 text-1.15" />
               </ButtonIcon>
 
               {/* file name */}
-              <strong className="text-1.15 ml-3 font-medium capitalize">
+              <strong className="title text-1.15 ml-3 font-medium capitalize opacity-0 -translate-y-4">
                 Credential
               </strong>
             </div>
@@ -384,9 +407,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                         return (
                           <div
                             key={item.id}
-                            className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none", {
+                            className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none invisible", {
                               "opacity-100": activeImage === i + 1,
                               "opacity-50 hover:opacity-80": activeImage !== i + 1,
+                              "-translate-x-16": i % 2 === 0,
+                              "translate-x-16": i % 2 !== 0,
                             })}
                             onClick={() => {
                               const imageContainer = document.querySelector(".image-container")
@@ -442,7 +467,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                           height={1080}
                           priority={i < 2}
                           quality={100}
-                          className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
+                          className={clsx("mx-auto object-contain  invisible translate-y-full real-image", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
                         />
                       </div>
                     )
@@ -459,7 +484,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
           >
-            {isLoading ? "hihi" : (
+            {isLoading ? <MobileImagesSkeleton /> : (
               <>
                 {data.acf.images.map((item: any, i: number) => {
                   return (
@@ -467,9 +492,11 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                       <Image
                         src={item.url}
                         alt={item.alt}
-                        className={clsx("image-mobile", {
+                        className={clsx("image-mobile opacity-0", {
                           "w-full object-cover": !isLandscape,
-                          "h-[100vw] object-contain": isLandscape && !isMobileLandscape
+                          "h-[100vw] object-contain": isLandscape && !isMobileLandscape,
+                          "-translate-x-20": i % 2 === 0,
+                          "translate-x-20": i % 2 !== 0
                         })}
                         width={1920}
                         height={1080}
@@ -483,8 +510,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
             {/* active slide mobile */}
             {isMobileDevice && (
-              <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
-                {activeImage} / {isLoading ? "hihi" : data.acf.images.length}
+              <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80 flex flex-row items-center">
+                {activeImage} / {isLoading ? <TbLoader2 className="animate-spin ml-0.5" /> : data.acf.images.length}
               </div>
             )
             }

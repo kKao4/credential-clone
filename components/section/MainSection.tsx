@@ -207,7 +207,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         return () => imagesContainer.removeEventListener("scroll", detectActiveImage)
       }
     }
-  }, [clickedSmallImages, isMobileDevice])
+  }, [clickedSmallImages, isMobileDevice, zoomScale])
 
   // calculate active img on mobile
   useEffect(() => {

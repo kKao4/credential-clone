@@ -8,6 +8,12 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "okhub.vn",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   reactStrictMode: false

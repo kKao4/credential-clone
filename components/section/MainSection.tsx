@@ -18,13 +18,14 @@ import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
 import { MdRotate90DegreesCcw, MdFullscreen, MdFullscreenExit } from "react-icons/md";
-import { TbArrowAutofitWidth, TbArrowAutofitHeight } from "react-icons/tb";
+import { TbArrowAutofitWidth, TbArrowAutofitHeight, TbLoader2 } from "react-icons/tb";
 import { useIsClient } from "usehooks-ts";
-import { slideDataImages } from "@/app/data";
 import { agentHas } from "@/utils/agentHas";
 import gsap from "gsap"
 import ScrollToPlugin from "gsap/ScrollToPlugin";
 import { clickedSmallImagesReducer } from "@/reducer/clickedSmallImagesReducer";
+import useSWR from "swr"
+import { fetcher } from "@/utils/fetcher";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -38,9 +39,6 @@ interface MainSectionProps {
 gsap.registerPlugin(ScrollToPlugin)
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
-  const [clickedSmallImages, dispatchClickedSmallImages] = useReducer(clickedSmallImagesReducer, slideDataImages.map((_, i) => {
-    return { index: i, clicked: false }
-  }))
   const headerRef = useRef<HTMLHeadElement>(null)
   const smallImageModalRef = useRef<HTMLDivElement>(null)
   const [showSmallImage, setShowSmallImage] = useState(true);
@@ -54,6 +52,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [draftActiveImage, setDraftActiveImage] = useState(1)
   const [draftZoomScale, setDraftZoomScale] = useState(1)
   const timeOutRef = useRef<any>(null)
+  const [beforeZoomActiveImage, setBeforeZoomActiveImage] = useState(1)
+  const { data, isLoading } = useSWR("https://okhub.vn/wp-json/acf/v3/pages/11583", fetcher)
+  const [clickedSmallImages, dispatchClickedSmallImages] = useReducer(clickedSmallImagesReducer, []);
 
   // show/hide small swiper
   const toggleSmallSwiper = () => setShowSmallImage(!showSmallImage);
@@ -74,11 +75,10 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const handleSubmitActiveImage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // tim slide hop le
-    const draft = Math.min(Math.max(1, draftActiveImage), slideDataImages.length);
+    const draft = Math.min(Math.max(1, draftActiveImage), data.acf.images.length);
     // set activeImage lai thanh gia tri hop le
     setActiveImage(draft);
     setDraftActiveImage(draft)
-    document.querySelectorAll(".image")[draft - 1].scrollIntoView({ behavior: "smooth" })
     gsap.to(document.querySelector(".image-container"), { duration: 0.5, scrollTo: document.querySelectorAll(".image")[draft - 1] })
   };
 
@@ -97,6 +97,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     // set zoomScale lai thanh gia tri hop le
     setZoomScale(draft);
     setDraftZoomScale(draft)
+    setBeforeZoomActiveImage(activeImage)
   };
 
   // handle action plus zoomScale
@@ -104,6 +105,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     const z = findNearestBiggerNumber(zoomScale, sortAsc(zoomScaleArray));
     setZoomScale(z as number);
     setDraftZoomScale(z as number)
+    setBeforeZoomActiveImage(activeImage)
   };
 
   // handle action minus zoomScale
@@ -111,7 +113,18 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     const z = findNearestSmallerNumber(zoomScale, sortAsc(zoomScaleArray));
     setZoomScale(z as number);
     setDraftZoomScale(z as number)
+    setBeforeZoomActiveImage(activeImage)
   };
+
+  useEffect(() => {
+    if (data) {
+      dispatchClickedSmallImages({
+        type: "setClickedSmallImages", value: data.acf.images.map((item: any, i: number) => {
+          return { index: i, clicked: false }
+        })
+      })
+    }
+  }, [data, isLoading])
 
   // config for full screen mode mobile
   useEffect(() => {
@@ -233,10 +246,17 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
   // scroll to active img when rotate mobile
   useEffect(() => {
-    if (isMobileDevice) {
+    if (isMobileDevice && data) {
       document.querySelectorAll(".image-mobile")[activeImage - 1].scrollIntoView(true)
     }
-  }, [isLandscape, isMobileDevice])
+  }, [data, isLandscape, isMobileDevice])
+
+  // stay focus at before zoom image
+  useEffect(() => {
+    if (isClient && data) {
+      gsap.to(document.querySelector(".image-container"), { duration: 0, scrollTo: document.querySelectorAll<HTMLElement>(".image")[beforeZoomActiveImage - 1] })
+    }
+  }, [beforeZoomActiveImage, data, isClient, zoomScale])
 
   return (
     <>
@@ -259,7 +279,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
               {/* file name */}
               <strong className="text-1.15 ml-3 font-medium capitalize">
-                File Name
+                Credential
               </strong>
             </div>
 
@@ -277,7 +297,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 />
                 <p className="text-0.75 text-white ml-1.5">/</p>
                 <p className="text-0.75 text-white ml-1.5">
-                  {slideDataImages.length}
+                  {isLoading ? <TbLoader2 className="text-0.75 animate-spin" /> : data.acf.images.length}
                 </p>
               </form>
 
@@ -355,36 +375,39 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 className="basis-1/5 flex-none overflow-y-auto"
               >
                 <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
-                  {slideDataImages.map((item, i) => {
-                    return (
-                      <div
-                        key={item.id}
-                        className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4", {
-                          "opacity-100": activeImage === i + 1,
-                          "opacity-50 hover:opacity-80": activeImage !== i + 1,
-                        })}
-                        onClick={() => {
-                          // document.querySelectorAll(".image")[i].scrollIntoView()
-                          const imageContainer = document.querySelector(".image-container")
-                          dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: true })
-                          gsap.to(imageContainer, {
-                            duration: 0.5, scrollTo: document.querySelectorAll(".image")[i], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: false })
-                          })
-                        }}
-                      >
-                        <Image
-                          src={item.src}
-                          alt={item.alt}
-                          width={140}
-                          height={78}
-                          priority={i < 5}
-                          className={clsx("h-[5.1rem] object-cover transition-400",
-                            { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
-                        />
-                        <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
-                      </div>
-                    )
-                  })}
+                  {isLoading ? "hihi" : (
+                    <>
+                      {data.acf.images.map((item: any, i: number) => {
+                        return (
+                          <div
+                            key={item.id}
+                            className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none", {
+                              "opacity-100": activeImage === i + 1,
+                              "opacity-50 hover:opacity-80": activeImage !== i + 1,
+                            })}
+                            onClick={() => {
+                              const imageContainer = document.querySelector(".image-container")
+                              dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: true })
+                              gsap.to(imageContainer, {
+                                duration: 0.5, scrollTo: document.querySelectorAll(".image")[i], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: false })
+                              })
+                            }}
+                          >
+                            <Image
+                              src={item.url}
+                              alt={item.alt}
+                              width={140}
+                              height={78}
+                              priority={i < 5}
+                              className={clsx("h-[5.1rem] object-cover transition-400",
+                                { "ring-[6px] ring-blue-main ": activeImage === i + 1 })}
+                            />
+                            <p className="text-center text-white text-0.75 mt-2.5 transition-400">{i + 1}</p>
+                          </div>
+                        )
+                      })}
+                    </>
+                  )}
                 </div>
               </div>
               {/* )} */}
@@ -394,31 +417,35 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
               style={{ gap: `calc(0.75rem*${zoomScale})` }}
             >
-              {slideDataImages.map((item, i) => {
-                return (
-                  <div
-                    key={item.id}
-                    className={clsx("image overflow-hidden transition-400", {
-                      "rotate-90": imageRotate === 90,
-                      "rotate-180": imageRotate === 180,
-                      "rotate-[270deg]": imageRotate === 270,
-                      "min-w-max": !fitWidth && zoomScale > 1,
-                      "w-full": fitWidth
-                    })}
-                    style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
-                  >
-                    <Image
-                      src={item.src}
-                      alt={item.alt}
-                      width={1920}
-                      height={1080}
-                      priority={i < 2}
-                      quality={100}
-                      className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
-                    />
-                  </div>
-                )
-              })}
+              {isLoading ? "hihi" : (
+                <>
+                  {data.acf.images.map((item: any, i: number) => {
+                    return (
+                      <div
+                        key={item.id}
+                        className={clsx("image overflow-hidden transition-400", {
+                          "rotate-90": imageRotate === 90,
+                          "rotate-180": imageRotate === 180,
+                          "rotate-[270deg]": imageRotate === 270,
+                          "min-w-max": !fitWidth && zoomScale > 1,
+                          "w-full": fitWidth
+                        })}
+                        style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
+                      >
+                        <Image
+                          src={item.url}
+                          alt={item.alt}
+                          width={1920}
+                          height={1080}
+                          priority={i < 2}
+                          quality={100}
+                          className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
+                        />
+                      </div>
+                    )
+                  })}
+                </>
+              )}
             </div>
           </div >
         )}
@@ -429,28 +456,32 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
           >
-            {slideDataImages.map((item, i) => {
-              return (
-                <div key={item.id} className="flex justify-center items-center mx-auto">
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    className={clsx("image-mobile", {
-                      "w-full object-cover": !isLandscape,
-                      "h-[100vw] object-contain": isLandscape && !isMobileLandscape
-                    })}
-                    width={1920}
-                    height={1080}
-                    priority={i < 4}
-                  />
-                </div>
-              )
-            })}
+            {isLoading ? "hihi" : (
+              <>
+                {data.acf.images.map((item: any, i: number) => {
+                  return (
+                    <div key={item.id} className="flex justify-center items-center mx-auto">
+                      <Image
+                        src={item.url}
+                        alt={item.alt}
+                        className={clsx("image-mobile", {
+                          "w-full object-cover": !isLandscape,
+                          "h-[100vw] object-contain": isLandscape && !isMobileLandscape
+                        })}
+                        width={1920}
+                        height={1080}
+                        priority={i < 4}
+                      />
+                    </div>
+                  )
+                })}
+              </>
+            )}
 
             {/* active slide mobile */}
             {isMobileDevice && (
               <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80">
-                {activeImage} / {slideDataImages.length}
+                {activeImage} / {isLoading ? "hihi" : data.acf.images.length}
               </div>
             )
             }

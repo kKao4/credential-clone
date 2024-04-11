@@ -274,7 +274,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
         bigImages.forEach((item, i) => {
           gsap.to(item as any, { y: 0, visibility: "visible", duration: 1.2, delay: i * 0.08, ease: "power2.out" })
         })
-        gsap.to(".title", { y: 0, autoAlpha: 1, duration: 0.8, delay: 0.4, ease: "power2.out" })
+        gsap.to(".title", { y: 0, autoAlpha: 1, duration: 1, delay: 0.2, ease: "power2.out" })
       } else {
         const images = gsap.utils.toArray(".image-mobile")
         images.forEach((item, i) => {

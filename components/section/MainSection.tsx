@@ -194,7 +194,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                   })
                 }
               }
-              if (!isClickedSmallImages) {
+              if (!isClickedSmallImages && zoomScale <= 1) {
                 timeOutRef.current = setTimeout(() => {
                   gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i], autoKill: true } })
                 }, 500)

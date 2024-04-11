@@ -53,6 +53,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const isClient = useIsClient()
   const [draftActiveImage, setDraftActiveImage] = useState(1)
   const [draftZoomScale, setDraftZoomScale] = useState(1)
+  const timeOutRef = useRef<any>(null)
 
   // show/hide small swiper
   const toggleSmallSwiper = () => setShowSmallImage(!showSmallImage);
@@ -152,16 +153,15 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   // calculate active img on desktop
   useEffect(() => {
     if (!isMobileDevice) {
-      let scrollTimeout: any;
       const imagesContainer = document.querySelector<HTMLElement>(".image-container")
       const images = document.querySelectorAll<HTMLElement>(".image")
       const imagesThumbContainer = document.querySelector<HTMLElement>(".image-thumb-container")
       const imagesThumb = document.querySelectorAll<HTMLElement>(".image-thumb")
       if (imagesContainer && headerRef.current && imagesThumbContainer) {
         const detectActiveImage = () => {
-          clearTimeout(scrollTimeout);
+          clearTimeout(timeOutRef.current);
           for (let i = 0; i < images.length; i++) {
-            if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) < images[i].offsetHeight / 2) {
+            if (Math.abs(images[i].getBoundingClientRect().top - headerRef.current!.offsetHeight) <= images[i].offsetHeight / 2 + parseFloat(window.getComputedStyle(imagesContainer).getPropertyValue("gap")) / 2) {
               setActiveImage(i + 1)
               setDraftActiveImage(i + 1)
               const isClickedSmallImages = clickedSmallImages.some(item => {
@@ -170,7 +170,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               const rect = imagesThumb[i].getBoundingClientRect()
               if (!(rect.top >= headerRef.current!.offsetHeight && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 rect.right <= (window.innerWidth || document.documentElement.clientWidth))) {
-                // imagesThumbContainer.scrollTo({ top: imagesThumb[i].offsetTop - parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")), behavior: "smooth" })
                 if (!isClickedSmallImages) {
                   gsap.to(imagesThumbContainer, {
                     duration: 0.5, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imagesThumbContainer).getPropertyValue("padding-top")) }
@@ -178,8 +177,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 }
               }
               if (!isClickedSmallImages) {
-                scrollTimeout = setTimeout(() => {
-                  gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i] } })
+                timeOutRef.current = setTimeout(() => {
+                  gsap.to(imagesContainer, { duration: 0.5, scrollTo: { y: images[i], autoKill: true } })
                 }, 500)
               }
               break;
@@ -207,7 +206,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               distanceArrayPortrait.push(img.getBoundingClientRect().top)
             })
             for (let i = 0; i < distanceArrayPortrait.length; i++) {
-              if (Math.abs(distanceArrayPortrait[i]) <= images[i].offsetHeight / 2) {
+              if (Math.abs(distanceArrayPortrait[i]) <= images[i].offsetHeight / 2 + parseFloat(window.getComputedStyle(imagesContainer).getPropertyValue("gap")) / 2) {
                 setActiveImage(i + 1)
                 break
               }
@@ -219,7 +218,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               distanceArrayLandscape.push(img.getBoundingClientRect().left)
             })
             for (let i = 0; i < distanceArrayLandscape.length; i++) {
-              if (Math.abs(distanceArrayLandscape[i]) <= images[i].offsetHeight / 2) {
+              if (Math.abs(distanceArrayLandscape[i]) <= images[i].offsetHeight / 2 + parseFloat(window.getComputedStyle(imagesContainer).getPropertyValue("gap")) / 2) {
                 setActiveImage(i + 1)
                 break
               }
@@ -366,8 +365,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                         })}
                         onClick={() => {
                           // document.querySelectorAll(".image")[i].scrollIntoView()
+                          const imageContainer = document.querySelector(".image-container")
                           dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: true })
-                          gsap.to(document.querySelector(".image-container"), {
+                          gsap.to(imageContainer, {
                             duration: 0.5, scrollTo: document.querySelectorAll(".image")[i], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: i, value: false })
                           })
                         }}

@@ -14,6 +14,7 @@ import clsx from "clsx";
 import ButtonIcon from "@/components/button/ButtonIcon";
 import HeaderDivider from "@/components/header/HeaderDivider";
 import { FaMinus, FaPlus } from "react-icons/fa6";
+import { IoMdMenu, IoMdClose } from "react-icons/io";
 import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
@@ -28,7 +29,6 @@ import useSWR from "swr"
 import { fetcher } from "@/utils/fetcher";
 import SmallImagesSkeleton from "../skeleton/SmallImagesSkeleton";
 import BigImageSkeleton from "../skeleton/BigImageSkeleton";
-import { useGSAP } from "@gsap/react"
 import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 import { FaAngleDown } from "react-icons/fa6";
 
@@ -41,7 +41,7 @@ interface MainSectionProps {
   isMobileDevice: boolean | undefined
 }
 
-gsap.registerPlugin(useGSAP, ScrollToPlugin)
+gsap.registerPlugin(ScrollToPlugin)
 
 export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const headerRef = useRef<HTMLHeadElement>(null)
@@ -277,27 +277,6 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
     }
   }, [beforeZoomActiveImage, data, isClient, zoomScale])
 
-  useGSAP(() => {
-    if (data) {
-      if (!isMobileDevice) {
-        const smallImages = gsap.utils.toArray(".image-thumb")
-        const bigImages = gsap.utils.toArray(".real-image")
-        smallImages.forEach((item, i) => {
-          gsap.to(item as any, { x: 0, visibility: "visible", duration: 0.6, delay: i * 0.08 })
-        })
-        bigImages.forEach((item, i) => {
-          gsap.to(item as any, { y: 0, visibility: "visible", duration: 1.2, delay: i * 0.08, ease: "power2.out" })
-        })
-        gsap.to(".title", { y: 0, autoAlpha: 1, duration: 1, delay: 0.2, ease: "power2.out" })
-      } else {
-        const images = gsap.utils.toArray(".image-mobile")
-        images.forEach((item, i) => {
-          gsap.to(item as any, { x: 0, autoAlpha: 1, duration: 0.8, delay: i * 0.08 })
-        })
-      }
-    }
-  }, [data, isMobileDevice])
-
   return (
     <>
       <main className="relative bg-gray-main h-screen">
@@ -318,7 +297,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
               </ButtonIcon>
 
               {/* file name */}
-              <strong className="title text-1.15 ml-3 font-medium capitalize opacity-0 -translate-y-4">
+              {/* TODO: replace with logo */}
+              <strong className="title text-1.15 ml-3 font-medium capitalize">
                 Credential
               </strong>
             </div>
@@ -384,20 +364,21 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             </div>
 
             {/* select section */}
-            <button ref={sectionMenuRef} className="relative min-w-[16rem] h-[2.35rem] px-3 ml-auto text-white bg-black rounded-md text-0.875 flex flex-row items-center justify-evenly transition-all duration-300 ease-out hover:bg-neutral-600" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)}>
+            <button ref={sectionMenuRef} className="relative min-w-[16rem] h-[2.35rem] px-3 ml-auto text-white bg-black rounded-md text-0.875 flex flex-row items-center justify-evenly transition-300 hover:bg-neutral-600" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)}>
               <p className="text-start grow">{currenSection}</p>
-              <FaAngleDown className="text-neutral-400 ml-3" />
-              <ul className={clsx("absolute -bottom-1 left-0 w-full translate-y-full bg-black z-10 rounded-md transition-all duration-300 ease-out", {
+              <FaAngleDown className="text-neutral-400 ml-3 transition-300" style={isOpenSectionMenu ? { transform: "rotateX(180deg)" } : undefined} />
+              <ul className={clsx("absolute -bottom-1 left-0 w-full translate-y-full bg-black z-10 rounded-md transition-300 max-h-[15rem] overflow-auto p-1.5 grid grid-cols-1 gap-1", {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
                 "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
-              })}>
+              })}
+                style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
                 {isLoading ? "" : (
                   <>
                     {data.acf.images.map((section: any) => {
                       return (
                         <li
                           key={section.header}
-                          className={clsx("py-2 transition-all duration-300 ease-out first-of-type:rounded-t-md last-of-type:rounded-b-md text-start px-3 capitalize", {
+                          className={clsx("py-2 transition-300 rounded-md text-start px-3 capitalize", {
                             "hover:bg-neutral-600": section.header !== currenSection,
                             "bg-neutral-600": section.header === currenSection
                           })}
@@ -409,7 +390,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                             for (let i = 0; i < images.length; i++) {
                               if (images[i].dataset.section === section.header) {
                                 gsap.to(imageContainer, { duration: 0, scrollTo: images[i] })
-                                gsap.to(imageThumbContainer, { duration: 0, scrollTo: imagesThumb[i] })
+                                gsap.to(imageThumbContainer, { duration: 0, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imageThumbContainer!).getPropertyValue("padding-top")) }, overwrite: true })
                                 break
                               }
                             }
@@ -472,11 +453,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                               return (
                                 <div
                                   key={item.id}
-                                  className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none invisible", {
+                                  className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none", {
                                     "opacity-100": activeImage === index + 1,
                                     "opacity-50 hover:opacity-80": activeImage !== index + 1,
-                                    "-translate-x-16": index % 2 === 0,
-                                    "translate-x-16": index % 2 !== 0,
                                   })}
                                   onClick={() => {
                                     const imageContainer = document.querySelector(".image-container")
@@ -539,7 +518,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                                 height={1080}
                                 priority={i < 2}
                                 quality={100}
-                                className={clsx("mx-auto object-contain invisible translate-y-full real-image", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
+                                className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
                               />
                             </div>
                           )
@@ -566,15 +545,13 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                     <>
                       {section.gallery.map((item: any, i: number) => {
                         return (
-                          <div key={item.id} className="flex justify-center items-center mx-auto">
+                          <div key={item.id} data-section={section.header} className="image-mobile flex justify-center items-center mx-auto">
                             <Image
                               src={item.url}
                               alt={item.alt}
-                              className={clsx("image-mobile opacity-0", {
+                              className={clsx("", {
                                 "w-full object-cover": !isLandscape,
                                 "h-[100vw] object-contain": isLandscape && !isMobileLandscape,
-                                "-translate-x-20": i % 2 === 0,
-                                "translate-x-20": i % 2 !== 0
                               })}
                               width={1920}
                               height={1080}
@@ -591,17 +568,47 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
 
             {/* active slide mobile */}
             {isMobileDevice && (
-              <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/60 to-white/40 text-black/80 flex flex-row items-center">
+              <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/80 to-white/70 text-black/80 flex flex-row items-center">
                 {activeImage} / {isLoading ? <TbLoader2 className="animate-spin ml-0.5" /> : imagesCount}
               </div>
             )
             }
 
+            <div className="fixed top-3.5 right-3.5 z-40">
+              <button className="size-9 rounded-full flex items-center bg-white justify-center z-50" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
+                {isOpenSectionMenu ? <IoMdClose className="text-[1.5rem] text-black/80" /> : <IoMdMenu className="text-[1.5rem] text-black/80" />}
+              </button>
+              {isLoading ? "" : <ul className={clsx("absolute top-[45%] right-[45%] bg-white min-w-[15rem] max-h-[12.5rem] overflow-auto -z-10 grid grid-cols-1 gap-1 p-1.5 rounded-md transition-300", {
+                "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
+                "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
+              })} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
+                {data.acf.images.map((section: any) => {
+                  return (
+                    <li
+                      key={section.header}
+                      className="text-black p-1.5 rounded-md"
+                      onClick={() => {
+                        const images = document.querySelectorAll<HTMLElement>(".image-mobile")
+                        for (let i = 0; i < images.length; i++) {
+                          if (images[i].dataset.section === section.header) {
+                            images[i].scrollIntoView(true)
+                            break
+                          }
+                        }
+                      }}
+                    >
+                      {section.header}
+                    </li>
+                  )
+                })}
+              </ul>}
+            </div>
+
             {/* full screen mobile btn */}
             {isMobileDevice && !isMobileLandscape && (
               <button
                 type="button"
-                className="flex size-8 rounded-full bg-gradient-to-r from-white/60 to-white/40 fixed top-3.5 right-3.5 z-40 font-bold justify-center items-center"
+                className="flex size-8 rounded-full bg-gradient-to-r from-white/80 to-white/70 fixed bottom-3.5 right-3.5 z-40 font-bold justify-center items-center"
                 onClick={() => {
                   setIsLandscape(!isLandscape);
                 }}

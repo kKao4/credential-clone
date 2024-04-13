@@ -20,6 +20,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .transition-200 {
   @apply transition-all duration-200 ease-out;
 }
+.transition-300 {
+  @apply transition-all duration-300 ease-out;
+}
 .transition-400 {
   @apply transition-all duration-400 ease-out;
 }

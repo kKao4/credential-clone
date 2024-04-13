@@ -31,6 +31,7 @@ import SmallImagesSkeleton from "../skeleton/SmallImagesSkeleton";
 import BigImageSkeleton from "../skeleton/BigImageSkeleton";
 import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 import { FaAngleDown } from "react-icons/fa6";
+import Lang from "./Lang";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -38,12 +39,13 @@ const zoomScaleArray = [
 ];
 
 interface MainSectionProps {
-  isMobileDevice: boolean | undefined
+  isMobileDevice: boolean | undefined,
+  api: string
 }
 
 gsap.registerPlugin(ScrollToPlugin)
 
-export default function MainSection({ isMobileDevice }: MainSectionProps) {
+export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
   const headerRef = useRef<HTMLHeadElement>(null)
   const smallImageModalRef = useRef<HTMLDivElement>(null)
   const [showSmallImage, setShowSmallImage] = useState(true);
@@ -58,12 +60,12 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
   const [draftZoomScale, setDraftZoomScale] = useState(1)
   const timeOutRef = useRef<any>(null)
   const [beforeZoomActiveImage, setBeforeZoomActiveImage] = useState(1)
-  const { data, isLoading } = useSWR("https://okhub.vn/wp-json/acf/v3/pages/11583", fetcher)
+  const { data, isLoading } = useSWR(api, fetcher)
   const [clickedSmallImages, dispatchClickedSmallImages] = useReducer(clickedSmallImagesReducer, []);
   const [imagesCount, setImagesCount] = useState(10)
   const [isOpenSectionMenu, setIsOpenSectionMenu] = useState(false)
   const [currenSection, setCurrentSection] = useState("")
-  const sectionMenuRef = useRef<HTMLButtonElement>(null)
+  const sectionMenuRef = useRef<HTMLElement>(null)
 
   useOnClickOutside(sectionMenuRef, () => setIsOpenSectionMenu(false))
 
@@ -364,8 +366,8 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             </div>
 
             {/* select section */}
-            <button ref={sectionMenuRef} className="relative min-w-[16rem] h-[2.35rem] px-3 ml-auto text-white bg-black rounded-md text-0.875 flex flex-row items-center justify-evenly transition-300 hover:bg-neutral-600" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)}>
-              <p className="text-start grow">{currenSection}</p>
+            <button ref={sectionMenuRef as any} className="relative min-w-[16rem] h-[2.35rem] px-3 ml-auto text-white bg-black rounded-md text-0.875 flex flex-row items-center justify-evenly transition-300 hover:bg-neutral-600" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)}>
+              <div className="text-start grow">{isLoading ? <div className="h-5 w-2/3 rounded bg-neutral-400 animate-pulse" /> : currenSection}</div>
               <FaAngleDown className="text-neutral-400 ml-3 transition-300" style={isOpenSectionMenu ? { transform: "rotateX(180deg)" } : undefined} />
               <ul className={clsx("absolute -bottom-1 left-0 w-full translate-y-full bg-black z-10 rounded-md transition-300 max-h-[15rem] overflow-auto p-1.5 grid grid-cols-1 gap-1", {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
@@ -404,6 +406,9 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                 )}
               </ul>
             </button>
+
+            {/* select language */}
+            <Lang className="ml-6" isMobileDevice={isMobileDevice} />
           </header>
         )}
 
@@ -574,14 +579,15 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
             )
             }
 
-            <div className="fixed top-3.5 right-3.5 z-40">
-              <button className="size-9 rounded-full flex items-center bg-white justify-center z-50" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
+            <div ref={sectionMenuRef as any} className="fixed top-3.5 right-3.5 z-40">
+              <button className="size-9 rounded-full flex items-center bg-white justify-center z-50" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)} style={{ "boxShadow": "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px" }}>
                 {isOpenSectionMenu ? <IoMdClose className="text-[1.5rem] text-black/80" /> : <IoMdMenu className="text-[1.5rem] text-black/80" />}
               </button>
               {isLoading ? "" : <ul className={clsx("absolute top-[45%] right-[45%] bg-white min-w-[15rem] max-h-[12.5rem] overflow-auto -z-10 grid grid-cols-1 gap-1 p-1.5 rounded-md transition-300", {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
                 "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
               })} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
+                <Lang className="px-1.5" isMobileDevice={isMobileDevice} />
                 {data.acf.images.map((section: any) => {
                   return (
                     <li
@@ -595,6 +601,7 @@ export default function MainSection({ isMobileDevice }: MainSectionProps) {
                             break
                           }
                         }
+                        setIsOpenSectionMenu(false)
                       }}
                     >
                       {section.header}

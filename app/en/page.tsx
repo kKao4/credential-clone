@@ -1,4 +1,3 @@
-import "./globals.css";
 import MainSection from "@/components/section/MainSection"
 
 export default function Home({
@@ -12,7 +11,7 @@ export default function Home({
   const isMobileDevice = viewport?.includes("mobile")
   return (
     <>
-      <MainSection isMobileDevice={isMobileDevice} />
+      <MainSection isMobileDevice={isMobileDevice} api="https://okhub.vn/wp-json/acf/v3/pages/11583" />
     </>
   )
 }

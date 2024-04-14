@@ -21,7 +21,7 @@ import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
 import { MdRotate90DegreesCcw, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { TbArrowAutofitWidth, TbArrowAutofitHeight, TbLoader2 } from "react-icons/tb";
 import { useIsClient, useOnClickOutside } from "usehooks-ts";
-import { agentHas } from "@/utils/agentHas";
+import { isIos } from "@/utils/isIos";
 import gsap from "gsap"
 import ScrollToPlugin from "gsap/ScrollToPlugin";
 import { clickedSmallImagesReducer } from "@/reducer/clickedSmallImagesReducer";
@@ -152,7 +152,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
     if (isLandscape && !isMobileLandscape) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
-      if ((!!(window as any).ApplePaySetupFeature || !!(window as any).safari) && agentHas("Safari") && !agentHas("Chrome") && !agentHas("CriOS")) {
+      if (isIos()) {
         htmlElement.style.width = "89vh";
       } else {
         htmlElement.style.width = "92.5vh";

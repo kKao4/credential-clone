@@ -27,6 +27,7 @@ import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 import { FaAngleDown } from "react-icons/fa6";
 import Lang from "./Lang";
 import okhubLogo from "@/assets/okhub-logo.svg"
+import okhubLogoMobile from "@/assets/okhub-logo-mobile.svg"
 import Link from "next/link";
 
 const zoomScaleArray = [
@@ -582,7 +583,12 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
                 "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
               })} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
-                <Lang className="px-1.5" isMobileDevice={isMobileDevice} />
+                <div className="flex flex-row items-center">
+                  <Link href="/">
+                    <Image src={okhubLogoMobile} alt="okhub logo" className="size-7" />
+                  </Link>
+                  <Lang className="ml-auto pr-4" isMobileDevice={isMobileDevice} />
+                </div>
                 {data.acf.images.map((section: any) => {
                   return (
                     <li

@@ -21,7 +21,7 @@ export default function Lang({ className, isMobileDevice }: LangProps) {
         "opacity-60 hover:opacity-100": pathname !== "/vi"
       })}>
         <div className="size-5 rounded-full overflow-hidden flex justify-center items-center">
-          <Image src={vi} alt="vietnam language" className="h-full object-cover" />
+          <Image src={vi} alt="vietnam language" className="h-full object-cover" priority />
         </div>
         {pathname === "/vi" && <p className="ml-1.5 text-0.875">vi</p>}
       </Link>
@@ -31,7 +31,7 @@ export default function Lang({ className, isMobileDevice }: LangProps) {
         "opacity-60 hover:opacity-100": pathname !== "/en"
       })}>
         <div className="size-5 rounded-full overflow-hidden flex justify-center items-center">
-          <Image src={en} alt="english language" className="h-full object-cover" />
+          <Image src={en} alt="english language" className="h-full object-cover" priority />
         </div>
         {pathname === "/en" && <p className="ml-1.5 text-0.875">en</p>}
       </Link>
@@ -41,7 +41,7 @@ export default function Lang({ className, isMobileDevice }: LangProps) {
         "opacity-60 hover:opacity-100": pathname !== "/zh"
       })}>
         <div className="size-5 rounded-full overflow-hidden flex justify-center items-center">
-          <Image src={zh} alt="vietnam language" className="h-full object-cover" />
+          <Image src={zh} alt="vietnam language" className="h-full object-cover" priority />
         </div>
         {pathname === "/zh" && <p className="ml-1.5 text-0.875">zh</p>}
       </Link>

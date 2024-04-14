@@ -10,8 +10,6 @@ export const metadata: Metadata = {
   keywords: "Okhub, Credential, Agency",
 };
 
-// TODO: add favicon
-
 export default function RootLayout({
   children,
 }: Readonly<{

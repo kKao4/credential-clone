@@ -1,12 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import "swiper/css";
-import "swiper/css/free-mode";
-import "swiper/css/thumbs";
-import "swiper/css/scrollbar";
-import "swiper/css/effect-creative";
-import "swiper/css/grid";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { FaBars } from "react-icons/fa";
 import { Transition } from "react-transition-group";
@@ -69,8 +63,8 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
 
   useOnClickOutside(sectionMenuRef, () => setIsOpenSectionMenu(false))
 
-  // show/hide small swiper
-  const toggleSmallSwiper = () => setShowSmallImage(!showSmallImage);
+  // show/hide small image thumb
+  const toggleSmallImage = () => setShowSmallImage(!showSmallImage);
 
   // toggle fit width slide
   const toggleFitWidth = () => setFitWidth(!fitWidth);
@@ -294,7 +288,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
           >
             <div className="flex flex-row items-center">
               {/* toggle small image container */}
-              <ButtonIcon onClick={toggleSmallSwiper}>
+              <ButtonIcon onClick={toggleSmallImage}>
                 <FaBars className="text-neutral-100 text-1.15" />
               </ButtonIcon>
 

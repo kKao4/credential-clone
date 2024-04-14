@@ -295,8 +295,8 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
               </ButtonIcon>
 
               {/* file name */}
-              <Link href="/" className="ml-3">
-                <Image src={okhubLogo} alt="okhub logo" className="size-10" />
+              <Link href="/" className="ml-5">
+                <Image src={okhubLogo} alt="okhub logo" className="w-28 h-8" />
               </Link>
             </div>
 
@@ -403,7 +403,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
             </button>
 
             {/* select language */}
-            <Lang className="ml-6" isMobileDevice={isMobileDevice} />
+            <Lang className="ml-5" isMobileDevice={isMobileDevice} />
           </header>
         )}
 

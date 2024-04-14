@@ -275,7 +275,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
   // stay focus at before zoom image
   useEffect(() => {
     if (isClient && data) {
-      gsap.to(document.querySelector(".image-container"), { duration: 0, scrollTo: document.querySelectorAll<HTMLElement>(".image")[beforeZoomActiveImage - 1] })
+      gsap.to(document.querySelector(".image-container"), { duration: 0, scrollTo: document.querySelectorAll<HTMLElement>(".image")[beforeZoomActiveImage - 1], overwrite: true })
     }
   }, [beforeZoomActiveImage, data, isClient, zoomScale])
 
@@ -464,9 +464,9 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
                                   })}
                                   onClick={() => {
                                     const imageContainer = document.querySelector(".image-container")
-                                    dispatchClickedSmallImages({ type: "toggleClickedImage", index: index, value: true })
+                                    dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: true })
                                     gsap.to(imageContainer, {
-                                      duration: 0.5, scrollTo: document.querySelectorAll(".image")[index], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: index, value: false })
+                                      duration: 0.5, scrollTo: document.querySelectorAll(".image")[index], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: false })
                                     })
                                   }}
                                 >

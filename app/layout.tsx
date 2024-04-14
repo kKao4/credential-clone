@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Credential",
+  title: "Okhub Credential",
   description: "Okhub Agency Credential",
   keywords: "Okhub, Credential, Agency",
 };

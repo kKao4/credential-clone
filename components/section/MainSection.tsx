@@ -26,6 +26,8 @@ import BigImageSkeleton from "../skeleton/BigImageSkeleton";
 import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 import { FaAngleDown } from "react-icons/fa6";
 import Lang from "./Lang";
+import okhubLogo from "@/assets/okhub-logo.svg"
+import Link from "next/link";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -64,7 +66,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
   useOnClickOutside(sectionMenuRef, () => setIsOpenSectionMenu(false))
 
   // show/hide small image thumb
-  const toggleSmallImage = () => setShowSmallImage(!showSmallImage);
+  const toggleSmallSwiper = () => setShowSmallImage(!showSmallImage);
 
   // toggle fit width slide
   const toggleFitWidth = () => setFitWidth(!fitWidth);
@@ -288,15 +290,14 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
           >
             <div className="flex flex-row items-center">
               {/* toggle small image container */}
-              <ButtonIcon onClick={toggleSmallImage}>
+              <ButtonIcon onClick={toggleSmallSwiper}>
                 <FaBars className="text-neutral-100 text-1.15" />
               </ButtonIcon>
 
               {/* file name */}
-              {/* TODO: replace with logo */}
-              <strong className="title text-1.15 ml-3 font-medium capitalize">
-                Credential
-              </strong>
+              <Link href="/" className="ml-3">
+                <Image src={okhubLogo} alt="okhub logo" className="size-10" />
+              </Link>
             </div>
 
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-row justify-center items-center text-white">

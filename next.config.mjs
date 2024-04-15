@@ -10,7 +10,13 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "okhub.vn",
+        hostname: "credential.okhub-tech.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
         port: "",
         pathname: "/**",
       },

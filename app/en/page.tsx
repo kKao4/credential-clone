@@ -12,7 +12,7 @@ export default function Home({
   const isMobileDevice = viewport?.includes("mobile")
   return (
     <>
-      <MainSection isMobileDevice={isMobileDevice} api={process.env.CMS_CREDENTIAL_EN + enId} />
+      <MainSection isMobileDevice={isMobileDevice} api={process.env.NEXT_PUBLIC_CREDENTIAL_HOST_URL + enId} />
     </>
   )
 }

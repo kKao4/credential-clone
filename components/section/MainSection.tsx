@@ -29,6 +29,7 @@ import Lang from "./Lang";
 import okhubLogo from "@/assets/okhub-logo.svg"
 import okhubLogoMobile from "@/assets/okhub-logo-mobile.svg"
 import Link from "next/link";
+import { isSafari } from "@/utils/isSafari";
 
 const zoomScaleArray = [
   0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4,
@@ -150,7 +151,11 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
       htmlElement.style.transform = "rotate(90deg)";
       htmlElement.style.transformOrigin = "right top";
       if (isIos()) {
-        htmlElement.style.width = "89vh";
+        if (isSafari()) {
+          htmlElement.style.width = "89vh";
+        } else {
+          htmlElement.style.width = "86vh";
+        }
       } else {
         htmlElement.style.width = "92.5vh";
       }

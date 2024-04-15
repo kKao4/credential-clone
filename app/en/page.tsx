@@ -11,7 +11,7 @@ export default function Home({
   const isMobileDevice = viewport?.includes("mobile")
   return (
     <>
-      <MainSection isMobileDevice={isMobileDevice} api="https://okhub.vn/wp-json/acf/v3/pages/11583" />
+      <MainSection isMobileDevice={isMobileDevice} api={process.env.CMS_CREDENTIAL_EN!} />
     </>
   )
 }

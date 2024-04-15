@@ -19,11 +19,6 @@ import { isIos } from "@/utils/isIos";
 import gsap from "gsap"
 import ScrollToPlugin from "gsap/ScrollToPlugin";
 import { clickedSmallImagesReducer } from "@/reducer/clickedSmallImagesReducer";
-import useSWR from "swr"
-import { fetcher } from "@/utils/fetcher";
-import SmallImagesSkeleton from "../skeleton/SmallImagesSkeleton";
-import BigImageSkeleton from "../skeleton/BigImageSkeleton";
-import MobileImagesSkeleton from "../skeleton/MobileImagesSkeleton";
 import { FaAngleDown } from "react-icons/fa6";
 import Lang from "./Lang";
 import okhubLogo from "@/assets/okhub-logo.svg"
@@ -38,12 +33,12 @@ const zoomScaleArray = [
 
 interface MainSectionProps {
   isMobileDevice: boolean | undefined,
-  api: string
+  data: any
 }
 
 gsap.registerPlugin(ScrollToPlugin)
 
-export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
+export default function MainSection({ isMobileDevice, data }: MainSectionProps) {
   const headerRef = useRef<HTMLHeadElement>(null)
   const smallImageModalRef = useRef<HTMLDivElement>(null)
   const [showSmallImage, setShowSmallImage] = useState(true);
@@ -58,7 +53,6 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
   const [draftZoomScale, setDraftZoomScale] = useState(1)
   const timeOutRef = useRef<any>(null)
   const [beforeZoomActiveImage, setBeforeZoomActiveImage] = useState(1)
-  const { data, isLoading } = useSWR(api, fetcher)
   const [clickedSmallImages, dispatchClickedSmallImages] = useReducer(clickedSmallImagesReducer, []);
   const [imagesCount, setImagesCount] = useState(10)
   const [isOpenSectionMenu, setIsOpenSectionMenu] = useState(false)
@@ -142,7 +136,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
         })
       })
     }
-  }, [data, isLoading])
+  }, [data])
 
   // config for full screen mode mobile
   useEffect(() => {
@@ -320,7 +314,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
                 />
                 <p className="text-0.75 text-white ml-1.5">/</p>
                 <p className="text-0.75 text-white ml-1.5">
-                  {isLoading ? <TbLoader2 className="animate-spin" /> : imagesCount}
+                  imagesCount
                 </p>
               </form>
 
@@ -368,43 +362,39 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
 
             {/* select section */}
             <button ref={sectionMenuRef as any} className="relative min-w-[16rem] h-[2.35rem] px-3 ml-auto text-white bg-black rounded-md text-0.875 flex flex-row items-center justify-evenly transition-300 hover:bg-neutral-600" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)}>
-              <div className="text-start grow">{isLoading ? <div className="h-5 w-2/3 rounded bg-neutral-400 animate-pulse" /> : currenSection}</div>
+              <div className="text-start grow">{currenSection}</div>
               <FaAngleDown className="text-neutral-400 ml-3 transition-300" style={isOpenSectionMenu ? { transform: "rotateX(180deg)" } : undefined} />
               <ul className={clsx("absolute -bottom-1 left-0 w-full translate-y-full bg-black z-10 rounded-md transition-300 max-h-[15rem] overflow-auto p-1.5 grid grid-cols-1 gap-1", {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
                 "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
               })}
                 style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
-                {isLoading ? "" : (
-                  <>
-                    {data.acf.images.map((section: any) => {
-                      return (
-                        <li
-                          key={section.header}
-                          className={clsx("py-2 transition-300 rounded-md text-start px-3 capitalize", {
-                            "hover:bg-neutral-600": section.header !== currenSection,
-                            "bg-neutral-600": section.header === currenSection
-                          })}
-                          onClick={() => {
-                            const images = document.querySelectorAll<HTMLElement>(".image")
-                            const imageContainer = document.querySelector(".image-container")
-                            const imagesThumb = document.querySelectorAll(".image-thumb")
-                            const imageThumbContainer = document.querySelector(".image-thumb-container")
-                            for (let i = 0; i < images.length; i++) {
-                              if (images[i].dataset.section === section.header) {
-                                gsap.to(imageContainer, { duration: 0, scrollTo: images[i] })
-                                gsap.to(imageThumbContainer, { duration: 0, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imageThumbContainer!).getPropertyValue("padding-top")) }, overwrite: true })
-                                break
-                              }
-                            }
-                          }}
-                        >
-                          {section.header}
-                        </li>
-                      )
-                    })}
-                  </>
-                )}
+                {data.acf.images.map((section: any) => {
+                  return (
+                    <li
+                      key={section.header}
+                      className={clsx("py-2 transition-300 rounded-md text-start px-3 capitalize", {
+                        "hover:bg-neutral-600": section.header !== currenSection,
+                        "bg-neutral-600": section.header === currenSection
+                      })}
+                      onClick={() => {
+                        const images = document.querySelectorAll<HTMLElement>(".image")
+                        const imageContainer = document.querySelector(".image-container")
+                        const imagesThumb = document.querySelectorAll(".image-thumb")
+                        const imageThumbContainer = document.querySelector(".image-thumb-container")
+                        for (let i = 0; i < images.length; i++) {
+                          if (images[i].dataset.section === section.header) {
+                            gsap.to(imageContainer, { duration: 0, scrollTo: images[i] })
+                            gsap.to(imageThumbContainer, { duration: 0, scrollTo: { y: imagesThumb[i], offsetY: parseFloat(window.getComputedStyle(imageThumbContainer!).getPropertyValue("padding-top")) }, overwrite: true })
+                            break
+                          }
+                        }
+                      }}
+                    >
+                      {section.header}
+                    </li>
+                  )
+                })}
               </ul>
             </button>
 
@@ -443,52 +433,48 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
                 className="basis-1/5 flex-none overflow-y-auto"
               >
                 <div className="grid grid-cols-1 gap-6 py-6 overflow-auto h-[92.5vh] image-thumb-container">
-                  {isLoading ? <SmallImagesSkeleton /> : (
-                    <>
-                      {data.acf.images.map((section: any, j: number) => {
-                        return (
-                          <>
-                            {section.gallery.map((item: any, i: number) => {
-                              let count = 0
-                              for (let g = 0; g <= j; g++) {
-                                if (g - 1 >= 0) {
-                                  count += data.acf.images[g - 1].gallery.length
-                                }
-                              }
-                              const index = count + i
-                              return (
-                                <div
-                                  key={item.id}
-                                  className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none", {
-                                    "opacity-100": activeImage === index + 1,
-                                    "opacity-50 hover:opacity-80": activeImage !== index + 1,
-                                  })}
-                                  onClick={() => {
-                                    const imageContainer = document.querySelector(".image-container")
-                                    dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: true })
-                                    gsap.to(imageContainer, {
-                                      duration: 0.5, scrollTo: document.querySelectorAll(".image")[index], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: false })
-                                    })
-                                  }}
-                                >
-                                  <Image
-                                    src={item.url}
-                                    alt={item.alt}
-                                    width={140}
-                                    height={78}
-                                    priority={i < 5}
-                                    className={clsx("h-3/4 object-cover transition-400",
-                                      { "ring-[6px] ring-blue-main": activeImage === index + 1 })}
-                                  />
-                                  <p className="text-center text-white text-0.75 mt-2.5 transition-400">{index + 1}</p>
-                                </div>
-                              )
-                            })}
-                          </>
-                        )
-                      })}
-                    </>
-                  )}
+                  {data.acf.images.map((section: any, j: number) => {
+                    return (
+                      <>
+                        {section.gallery.map((item: any, i: number) => {
+                          let count = 0
+                          for (let g = 0; g <= j; g++) {
+                            if (g - 1 >= 0) {
+                              count += data.acf.images[g - 1].gallery.length
+                            }
+                          }
+                          const index = count + i
+                          return (
+                            <div
+                              key={item.id}
+                              className={clsx("mx-auto flex flex-col h-[6.7rem] w-[9.15rem] transition-400 cursor-pointer image-thumb scroll-py-4 select-none", {
+                                "opacity-100": activeImage === index + 1,
+                                "opacity-50 hover:opacity-80": activeImage !== index + 1,
+                              })}
+                              onClick={() => {
+                                const imageContainer = document.querySelector(".image-container")
+                                dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: true })
+                                gsap.to(imageContainer, {
+                                  duration: 0.5, scrollTo: document.querySelectorAll(".image")[index], onComplete: () => dispatchClickedSmallImages({ type: "toggleClickedImage", index: index + 1, value: false })
+                                })
+                              }}
+                            >
+                              <Image
+                                src={item.url}
+                                alt={item.alt}
+                                width={140}
+                                height={78}
+                                priority={i < 5}
+                                className={clsx("h-3/4 object-cover transition-400",
+                                  { "ring-[6px] ring-blue-main": activeImage === index + 1 })}
+                              />
+                              <p className="text-center text-white text-0.75 mt-2.5 transition-400">{index + 1}</p>
+                            </div>
+                          )
+                        })}
+                      </>
+                    )
+                  })}
                 </div>
               </div>
               {/* )} */}
@@ -498,42 +484,38 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
               className={clsx("basis-4/5 h-[92.5vh] grid grid-cols-1 py-1 overflow-auto image-container items-center justify-center w-full")}
               style={{ gap: `calc(0.75rem*${zoomScale})` }}
             >
-              {isLoading ? <BigImageSkeleton /> : (
-                <>
-                  {data.acf.images.map((section: any) => {
-                    return (
-                      <>
-                        {section.gallery.map((item: any, i: number) => {
-                          return (
-                            <div
-                              key={item.id}
-                              data-section={section.header}
-                              className={clsx("image overflow-hidden transition-400", {
-                                "rotate-90": imageRotate === 90,
-                                "rotate-180": imageRotate === 180,
-                                "rotate-[270deg]": imageRotate === 270,
-                                "min-w-max": !fitWidth && zoomScale > 1,
-                                "w-full": fitWidth
-                              })}
-                              style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
-                            >
-                              <Image
-                                src={item.url}
-                                alt={item.alt}
-                                width={1920}
-                                height={1080}
-                                priority={i < 2}
-                                quality={100}
-                                className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
-                              />
-                            </div>
-                          )
-                        })}
-                      </>
-                    )
-                  })}
-                </>
-              )}
+              {data.acf.images.map((section: any) => {
+                return (
+                  <>
+                    {section.gallery.map((item: any, i: number) => {
+                      return (
+                        <div
+                          key={item.id}
+                          data-section={section.header}
+                          className={clsx("image overflow-hidden transition-400", {
+                            "rotate-90": imageRotate === 90,
+                            "rotate-180": imageRotate === 180,
+                            "rotate-[270deg]": imageRotate === 270,
+                            "min-w-max": !fitWidth && zoomScale > 1,
+                            "w-full": fitWidth
+                          })}
+                          style={!fitWidth ? { height: `calc(92.5vh*${zoomScale})` } : { height: "max-content" }}
+                        >
+                          <Image
+                            src={item.url}
+                            alt={item.alt}
+                            width={1920}
+                            height={1080}
+                            priority={i < 2}
+                            quality={100}
+                            className={clsx("mx-auto object-contain", { "h-full w-auto": !fitWidth, "w-full h-auto": fitWidth })}
+                          />
+                        </div>
+                      )
+                    })}
+                  </>
+                )
+              })}
             </div>
           </div >
         )}
@@ -544,38 +526,33 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
           })}
             style={isLandscape && !isMobileLandscape ? { width: "100%", height: "100vw" } : undefined}
           >
-            {isLoading ? <MobileImagesSkeleton /> : (
-              <>
-                {data.acf.images.map((section: any) => {
-                  return (
-                    <>
-                      {section.gallery.map((item: any, i: number) => {
-                        return (
-                          <div key={item.id} data-section={section.header} className="image-mobile flex justify-center items-center mx-auto">
-                            <Image
-                              src={item.url}
-                              alt={item.alt}
-                              className={clsx("", {
-                                "w-full object-cover": !isLandscape,
-                                "h-[100vw] object-contain": isLandscape && !isMobileLandscape,
-                              })}
-                              width={1920}
-                              height={1080}
-                              priority={i < 4}
-                            />
-                          </div>
-                        )
-                      })}
-                    </>
-                  )
-                })}
-              </>
-            )}
-
+            {data.acf.images.map((section: any) => {
+              return (
+                <>
+                  {section.gallery.map((item: any, i: number) => {
+                    return (
+                      <div key={item.id} data-section={section.header} className="image-mobile flex justify-center items-center mx-auto">
+                        <Image
+                          src={item.url}
+                          alt={item.alt}
+                          className={clsx("", {
+                            "w-full object-cover": !isLandscape,
+                            "h-[100vw] object-contain": isLandscape && !isMobileLandscape,
+                          })}
+                          width={1920}
+                          height={1080}
+                          priority={i < 4}
+                        />
+                      </div>
+                    )
+                  })}
+                </>
+              )
+            })}
             {/* active slide mobile */}
             {isMobileDevice && (
               <div className="fixed px-4 py-1.5 top-3.5 left-3.5 rounded-lg font-bold z-40 text-0.875 md:text-[1.5rem] backdrop-blur-md bg-gradient-to-r from-white/80 to-white/70 text-black/80 flex flex-row items-center">
-                {activeImage} / {isLoading ? <TbLoader2 className="animate-spin ml-0.5" /> : imagesCount}
+                {activeImage} / {imagesCount}
               </div>
             )
             }
@@ -584,7 +561,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
               <button className="size-9 rounded-full flex items-center bg-white justify-center z-50" onClick={() => setIsOpenSectionMenu(!isOpenSectionMenu)} style={{ "boxShadow": "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px" }}>
                 {isOpenSectionMenu ? <IoMdClose className="text-[1.5rem] text-black/80" /> : <IoMdMenu className="text-[1.5rem] text-black/80" />}
               </button>
-              {isLoading ? "" : <ul className={clsx("absolute top-[45%] right-[45%] bg-white min-w-[15rem] max-h-[12.5rem] overflow-auto -z-10 grid grid-cols-1 gap-1 p-1.5 rounded-md transition-300", {
+              <ul className={clsx("absolute top-[45%] right-[45%] bg-white min-w-[15rem] max-h-[12.5rem] overflow-auto -z-10 grid grid-cols-1 gap-1 p-1.5 rounded-md transition-300", {
                 "opacity-100 scale-1 pointer-events-auto": isOpenSectionMenu,
                 "opacity-0 scale-[0.92] pointer-events-none": !isOpenSectionMenu
               })} style={{ "boxShadow": "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px" }}>
@@ -614,7 +591,7 @@ export default function MainSection({ isMobileDevice, api }: MainSectionProps) {
                     </li>
                   )
                 })}
-              </ul>}
+              </ul>
             </div>
 
             {/* full screen mobile btn */}

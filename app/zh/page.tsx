@@ -1,18 +1,27 @@
 import MainSection from "@/components/section/MainSection"
 import { zhId } from "@/constant/pageId"
 
-export default function Home({
+async function getData() {
+  const res = await fetch(process.env.NEXT_PUBLIC_CREDENTIAL_HOST_URL + zhId)
+  if (!res.ok) {
+    throw new Error("Failed to fetch data")
+  }
+  return res.json()
+}
+
+export default async function Home({
   params,
   searchParams,
 }: {
   params: { slug: string }
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
+  const data = await getData()
   const { viewport } = searchParams
   const isMobileDevice = viewport?.includes("mobile")
   return (
     <>
-      <MainSection isMobileDevice={isMobileDevice} api={process.env.NEXT_PUBLIC_CREDENTIAL_HOST_URL + zhId} />
+      <MainSection isMobileDevice={isMobileDevice} data={data} />
     </>
   )
 }

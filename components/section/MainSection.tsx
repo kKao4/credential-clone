@@ -314,7 +314,7 @@ export default function MainSection({ isMobileDevice, data }: MainSectionProps) 
                 />
                 <p className="text-0.75 text-white ml-1.5">/</p>
                 <p className="text-0.75 text-white ml-1.5">
-                  imagesCount
+                  {imagesCount}
                 </p>
               </form>
 

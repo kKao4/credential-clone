@@ -1,4 +1,5 @@
 import MainSection from "@/components/section/MainSection"
+import { enId } from "@/constant/pageId"
 
 export default function Home({
   params,
@@ -11,7 +12,7 @@ export default function Home({
   const isMobileDevice = viewport?.includes("mobile")
   return (
     <>
-      <MainSection isMobileDevice={isMobileDevice} api={process.env.CMS_CREDENTIAL_EN!} />
+      <MainSection isMobileDevice={isMobileDevice} api={process.env.CMS_CREDENTIAL_EN + enId} />
     </>
   )
 }

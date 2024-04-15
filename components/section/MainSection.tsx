@@ -13,7 +13,7 @@ import { findNearestBiggerNumber } from "@/utils/findNearestBiggerNumber";
 import { sortAsc } from "@/utils/sortArrayAsc";
 import { findNearestSmallerNumber } from "@/utils/findNearestSmallerNumber";
 import { MdRotate90DegreesCcw, MdFullscreen, MdFullscreenExit } from "react-icons/md";
-import { TbArrowAutofitWidth, TbArrowAutofitHeight, TbLoader2 } from "react-icons/tb";
+import { TbArrowAutofitWidth, TbArrowAutofitHeight } from "react-icons/tb";
 import { useIsClient, useOnClickOutside } from "usehooks-ts";
 import { isIos } from "@/utils/isIos";
 import gsap from "gsap"
@@ -148,7 +148,7 @@ export default function MainSection({ isMobileDevice, data }: MainSectionProps) 
         if (isSafari()) {
           htmlElement.style.width = "89vh";
         } else {
-          htmlElement.style.width = "86vh";
+          htmlElement.style.width = "87vh";
         }
       } else {
         htmlElement.style.width = "92.5vh";
